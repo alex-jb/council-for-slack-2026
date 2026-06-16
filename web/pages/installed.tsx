@@ -1,13 +1,15 @@
 import type { GetServerSideProps } from "next";
+import { getDb } from "../lib/db";
 
 interface Props {
   status: "ok" | "denied" | "error";
   team?: string;
   reason?: string;
   open?: string;
+  installCount?: number;
 }
 
-export default function InstalledPage({ status, team, reason, open }: Props) {
+export default function InstalledPage({ status, team, reason, open, installCount }: Props) {
   const ok = status === "ok";
   const title = ok ? "Council installed to your workspace" : "Council install did not complete";
   return (
@@ -72,7 +74,16 @@ export default function InstalledPage({ status, team, reason, open }: Props) {
             </p>
           </>
         )}
-        <div style={{ marginTop: "3rem", fontSize: "0.875rem", color: "#666" }}>
+        {typeof installCount === "number" && installCount > 0 && (
+          <div style={{ marginTop: "2.5rem", fontSize: "0.875rem", color: "#888" }}>
+            Council is live in{" "}
+            <strong style={{ color: "#F5F5F5" }}>
+              {installCount} {installCount === 1 ? "workspace" : "workspaces"}
+            </strong>{" "}
+            today.
+          </div>
+        )}
+        <div style={{ marginTop: "1.5rem", fontSize: "0.875rem", color: "#666" }}>
           <a href="https://github.com/alex-jb/council-for-slack-2026" style={{ color: "#7C3AED" }}>
             github.com/alex-jb/council-for-slack-2026
           </a>
@@ -84,12 +95,25 @@ export default function InstalledPage({ status, team, reason, open }: Props) {
 
 export const getServerSideProps: GetServerSideProps<Props> = async ({ query }) => {
   const status = (query.status as string) === "ok" ? "ok" : (query.status as string) === "denied" ? "denied" : "error";
+
+  let installCount: number | null = null;
+  try {
+    const db = getDb();
+    if (db) {
+      const { data, error } = await db.rpc("council_installation_count");
+      if (!error && typeof data === "number") installCount = data;
+    }
+  } catch {
+    // best-effort — if Supabase is down, page still renders
+  }
+
   return {
     props: {
       status: status as Props["status"],
       team: (query.team as string) || null,
       reason: (query.reason as string) || null,
       open: (query.open as string) || null,
+      installCount,
     } as unknown as Props,
   };
 };
