@@ -36,7 +36,7 @@
 
 Every team already has the *informal* ritual: before a real decision ships, somebody DMs three trusted people and asks "what would you do?". The replies disagree. The disagreement is the signal. Council makes that ritual native to the channel where the decision is happening, then keeps score.
 
-Built on [council-diff](https://github.com/alex-jb/council-diff) v0.4.0 (OSS, MIT, on npm + distributed across 71 AI agent platforms via skills.sh). Targeting [Slack Agent Builder Challenge](https://slackcommunity.com/challenges/agent-builder) 2026-07-13.
+Built on [council-diff](https://github.com/alex-jb/council-diff) v0.4.2 (OSS, MIT, on npm + distributed across 71 AI agent platforms via skills.sh). Targeting [Slack Agent Builder Challenge](https://slackcommunity.com/challenges/agent-builder) 2026-07-13.
 
 ---
 
@@ -213,9 +213,9 @@ council_decision_resolve RPC → Brier per voice + council → audit re-renders
 **Stack**:
 - **Next.js 16.2** Pages Router on Vercel (`maxDuration: 60`)
 - **@slack/bolt** with `processBeforeResponse: true` (required FaaS pattern; otherwise Vercel kills the in-flight deliberation Promise when ack ends the response)
-- **council-diff** v0.4.0 ([npm](https://www.npmjs.com/package/council-diff), MIT, also authored here)
+- **council-diff** v0.4.2 ([npm](https://www.npmjs.com/package/council-diff) + [skills.sh universal install](https://skills.sh), MIT, also authored here; 0 `npm audit` vulns)
 - **Anthropic Sonnet 4.6** default; Mythos Fable-5 Oracle opt-in for tiebreaks (`oracle: "fable-5"`)
-- **Supabase** Postgres — `council` schema + 3 SECURITY DEFINER RPCs (`council_decision_insert`, `council_decisions_recent`, `council_decision_resolve`). Anon key only. No service_role in app code. RLS deny-all on the table; RPC path is the only door.
+- **Supabase** Postgres — `council` schema + 7 SECURITY DEFINER RPCs (`council_decision_insert`, `council_decisions_recent`, `council_decision_resolve`, `council_workspace_stats`, `council_installation_upsert`, `council_get_install_token`, `council_installation_count`). Anon key only. No service_role in app code. RLS deny-all on the table; RPC path is the only door.
 
 **Brier math** (binary outcome):
 - recommendation → probability of "happened": `go → 0.80, wait → 0.40, kill → 0.10, split → 0.50`
