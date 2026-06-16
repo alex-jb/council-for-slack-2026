@@ -25,7 +25,8 @@
 2. **Four real `council.deliberate()` fires demonstrate the engine isn't a one-off** — see ["Live case studies"](#live-case-studies--four-real-fires-full-verdict-spectrum) for GO 0.89 / KILL 0.94 / two flavors of WAIT covering the full spectrum
 3. **Brier audit at resolution** is the calibration moat — `/council-audit` shows the workspace's average Brier as a single labelled number, drifting in real-time as decisions land. Verified live: workspace `T0BAKDLM11R` shows `Workspace calibration: excellent · avg Brier 0.040 across 1 resolved`.
 4. **60-second demo** opens on the Brier audit (not the deliberation) per your rubric guidance — script at [`docs/loom-script.md`](./docs/loom-script.md), workspace pre-stage at [`docs/loom-pre-stage-workspace.md`](./docs/loom-pre-stage-workspace.md)
-5. **Devpost submission copy** ready in [`docs/devpost-submission.md`](./docs/devpost-submission.md). Day-by-day ship log in [`CHANGELOG.md`](./CHANGELOG.md)
+5. **OAuth multi-workspace install** — "Add to Slack" button up top installs Council to any workspace in 60 seconds. Per-workspace `bot_token` stored via SECURITY DEFINER RPC, never anon-readable. Bolt `authorize()` callback resolves inbound `team_id` → installed token. ([handler](./web/pages/api/slack/oauth_redirect.ts), [migration](./migrations/004_oauth_installations.sql), [success page](./web/pages/installed.tsx))
+6. **Devpost submission copy** ready in [`docs/devpost-submission.md`](./docs/devpost-submission.md). Day-by-day ship log in [`CHANGELOG.md`](./CHANGELOG.md). One-pager for fast scan: [`docs/submission-1pager.md`](./docs/submission-1pager.md).
 
 **If you have 60 more seconds**: the README "[Who uses this](#who-uses-this)" table pairs 5 personas with what changes for them vs a single-LLM answer.
 
