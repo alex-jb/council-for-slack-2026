@@ -10,12 +10,12 @@
 
 **Skip to what matters first**:
 
-1. **Three rubric-required technologies, all load-bearing** (not lipstick):
-   - **Workflow Builder custom step** (`council_deliberate`) — spec at [`docs/workflow-builder.md`](./docs/workflow-builder.md), handler at [`web/pages/api/slack/events.ts`](./web/pages/api/slack/events.ts#L450)
-   - **MCP server** — wrapper at [`mcp/src/server.mjs`](./mcp/src/server.mjs) exposing `council_deliberate` to Claude Desktop / Cursor / Claude Code
-   - **Channel Canvas** — auto-pinned decision log at [`appendCanvasLog()`](./web/pages/api/slack/events.ts#L226)
+1. **Rubric-required technologies — live in the sandbox workspace right now**:
+   - **MCP server** — wrapper at [`mcp/src/server.mjs`](./mcp/src/server.mjs) exposing `council_deliberate` to Claude Desktop / Cursor / Claude Code. Smoke-tested, on npm.
+   - **Channel Canvas API** — auto-pinned decision log at [`appendCanvasLog()`](./web/pages/api/slack/events.ts#L226), confirmed rendering Brier-audited entries in the sandbox workspace as of 2026-06-16.
+   - **Workflow Builder custom step** (`council_deliberate`) — handler at [`web/pages/api/slack/events.ts`](./web/pages/api/slack/events.ts#L450), manifest at [`docs/slack-app-manifest-with-functions.json`](./docs/slack-app-manifest-with-functions.json), spec at [`docs/workflow-builder.md`](./docs/workflow-builder.md). **Code-complete; registration blocked on the sandbox workspace's Free plan** ("Feature is not available on this team" — Slack docs confirm custom functions require Pro / Business+ / Enterprise Grid / Developer Sandbox). Judges on a function-eligible workspace can swap in the with-functions manifest and reinstall in 60 seconds.
 2. **Four real `council.deliberate()` fires demonstrate the engine isn't a one-off** — see ["Live case studies"](#live-case-studies--four-real-fires-full-verdict-spectrum) for GO 0.89 / KILL 0.94 / two flavors of WAIT covering the full spectrum
-3. **Brier audit at resolution** is the calibration moat — `/council-audit` shows the workspace's average Brier as a single labelled number, drifting in real-time as decisions land
+3. **Brier audit at resolution** is the calibration moat — `/council-audit` shows the workspace's average Brier as a single labelled number, drifting in real-time as decisions land. Verified live: workspace `T0BAKDLM11R` shows `Workspace calibration: excellent · avg Brier 0.040 across 1 resolved`.
 4. **60-second demo** opens on the Brier audit (not the deliberation) per your rubric guidance — script at [`docs/loom-script.md`](./docs/loom-script.md), workspace pre-stage at [`docs/loom-pre-stage-workspace.md`](./docs/loom-pre-stage-workspace.md)
 5. **Devpost submission copy** ready in [`docs/devpost-submission.md`](./docs/devpost-submission.md). Day-by-day ship log in [`CHANGELOG.md`](./CHANGELOG.md)
 
@@ -77,11 +77,11 @@ Same `council.deliberate()` engine. Three surfaces a Slack admin can compose int
 |---|---|---|
 | **`/council` slash command** | The one-user-types ritual. Decisions go into the channel where the decision is happening, not into a separate AI tab. | — |
 | **`Send to Council` message shortcut** | Right-click any Slack message → modal → council deliberates and posts the verdict as a threaded reply on the source message. Hot takes become calibrated decisions in two clicks. | — |
-| **`Council deliberate` Workflow Builder step** ([spec](./docs/workflow-builder.md)) | Non-coder admins drop the council into automations. e.g. "when a Jira issue moves to 'needs decision', fire council with the issue body, post verdict to the thread." | **Workflow Builder custom step** ✓ |
-| **Channel Canvas decision log** (auto-pinned) | Every council fire auto-appends a Brier-audited entry to the channel's Canvas. Built-in living "team decision log" judges can scroll through. | **Canvas API** ✓ |
-| **MCP server** ([`mcp/`](./mcp/)) | The same primitive exposed to Claude Desktop / Cursor / Claude Code via Model Context Protocol. Same engine, four surfaces. | **MCP server** ✓ |
+| **`Council deliberate` Workflow Builder step** ([spec](./docs/workflow-builder.md)) | Non-coder admins drop the council into automations. e.g. "when a Jira issue moves to 'needs decision', fire council with the issue body, post verdict to the thread." | **Workflow Builder custom step** ⏸ code-ready, registration blocked on the sandbox workspace's Free plan |
+| **Channel Canvas decision log** (auto-pinned) | Every council fire auto-appends a Brier-audited entry to the channel's Canvas. Built-in living "team decision log" judges can scroll through. | **Canvas API** ✓ live |
+| **MCP server** ([`mcp/`](./mcp/)) | The same primitive exposed to Claude Desktop / Cursor / Claude Code via Model Context Protocol. Same engine, four surfaces. | **MCP server** ✓ live |
 
-3/3 of the Slack Agent Builder Challenge required technologies, all load-bearing — not lipstick.
+**2/3 Slack Agent Builder rubric-required technologies live in the sandbox right now** (MCP + Canvas). Workflow Builder is code-complete (function handler + manifest + spec + smoke-test guide), waiting on a workspace plan that allows custom function registration. Swap [`docs/slack-app-manifest-with-functions.json`](./docs/slack-app-manifest-with-functions.json) into a function-eligible workspace and reinstall → Workflow Builder picker shows "Council deliberate" in <60 seconds.
 
 ---
 
