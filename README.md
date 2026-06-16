@@ -62,6 +62,26 @@ That 34-point spread between two professional perspectives is the signal a singl
 
 ---
 
+## Why this thesis is not new — and why it still wins
+
+Four 2026 signals frame why a Slack-native, Anthropic-powered, Brier-audited council is the right product *now*:
+
+**1. Anthropic's safety thesis is a structural business moat, not a product feature.**
+Ben Thompson, ["Anthropic's Safety Superpower"](https://stratechery.com/2026/anthropics-safety-superpower/) (Stratechery, 2026-06-15). Council for Slack is built on Anthropic by design — the only AI lab whose safety positioning is its market positioning. High-stakes Slack decisions (Should we lay off? Should we ship under SOC2?) need a model provider whose commercial incentive is to *not* hallucinate, not just claim it.
+
+**2. Anthropic is an organizational invention, and council-diff is the missing evaluation loop for it.**
+海外独角兽 (Celia / Siqi / penny), ["拆解 Anthropic:最好的 AI 公司,可能也是一种组织发明"](https://www.huxiu.com/article/4866239.html) (2026-05-22, mirrored on Huxiu and Sina). ARR went 9B → 45B in Q1 2026; trajectory to 100B by year-end. A 5x-in-9-months production system needs an audit layer. council-diff is that layer for everyone *using* Anthropic in the wild.
+
+**3. Sample efficiency is the next frontier, and multi-persona deliberation is one way to get it.**
+Dwarkesh Patel, ["The sample efficiency black hole"](https://www.dwarkesh.com/p/sample-efficiency) (2026-06-08). Karpathy's framing: a single agent learns slowly. Council-diff gets 5 calibration signals per fire instead of 1 — sample-efficiency applied to *judgment* instead of weight updates. The Brier audit closes the loop.
+
+**4. "AI shortcut" is the real critique, and exposing disagreement is the antidote.**
+杨临风 (洋葱学园 CEO) on LateTalk ep. 167, ["用 AI 制造捷径,是在杀死真学习"](https://www.xiaoyuzhoufm.com/podcast/61933ace1b4320461e91fd55) (2026-05-27). The valid worry about LLMs in decision-making is that they let humans skip thinking. Council inverts that — instead of giving one confident answer that closes the conversation, it surfaces 5 voices that openly disagree and forces the user to *engage* with the disagreement. Council is structurally the opposite of an AI shortcut.
+
+Four independent 2026 voices — strategy (Thompson), research-translation (海外独角兽), AI-thesis (Dwarkesh/Karpathy), domain critique (杨临风) — all point at the same product shape. Council for Slack ships it.
+
+---
+
 ## How it works
 
 ```
