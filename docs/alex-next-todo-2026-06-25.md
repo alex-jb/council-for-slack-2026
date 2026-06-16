@@ -2,6 +2,24 @@
 
 > Code 全 ship 完了。剩这几件是 Slack/Vercel/marketing 平台需要 Alex 的眼睛/账户。
 
+## 🟡 待你决定 — Slack Developer Sandbox 绑卡 + provision
+
+入会完了 (https://api.slack.com/developer-program/dashboard "Welcome Xiaoyu Ji"). 还差最后两步:
+
+1. 用 **virtual card** (Privacy.com 限额 $1) 绑 payment method,Slack 政策 sandbox 完全免费但要 identity verify
+2. Provision sandbox workspace → 等邀请邮件 (~24h)
+3. 拿到 sandbox URL 后 ping 我,我帮装 `docs/slack-app-manifest-with-functions.json` + 验证 Workflow Builder 里看到 `council_deliberate` 出现
+
+不绑也可以 — Devpost submission 写 "code-complete, sandbox provision deferred" 也算诚实立场,但拍 Loom 时少一段 Workflow Builder demo 视频。
+
+## 🟡 Vercel Deployment Protection 关一下 (30 sec)
+
+今天 GitHub auto-link 之后,Vercel 把 a9071c1 commit 状态打成 `BLOCKED` (deployment protection 默认开了)。手动 `vercel --prod` 能绕,但每次 push 麻烦。
+
+Settings → Deployment Protection → **Disabled** → Save. 一次关了以后 GitHub push 自动上 prod。
+
+---
+
 ## 🔥 立刻 (5 min) — 启用 OAuth distribution
 
 OAuth 安装代码 + DB 全 ready。但 Slack App 默认是 "single workspace install only"。要让外部 workspace 装,要 Alex 启用 distribution。
@@ -16,17 +34,21 @@ OAuth 安装代码 + DB 全 ready。但 Slack App 默认是 "single workspace in
 
 **注意**: distribution 启用后,**custom function 那个 with-functions 版本依然 not distributable** (Slack 政策)。Free-plan 版本 OK。
 
-## ⚡ 今天稍后 (1 min) — Skills.sh 上架 council-diff
+## ⚡ Skills.sh 已 LIVE — 不需要 publish
 
-跟 marketing-agent 一样 dogfood。
+之前 plan 写错了。Skills.sh 不是 npm publish 模型,**没有 `login`/`publish` command**。它是 **GitHub-as-registry**: 你 push `SKILL.md` 到 root → 任何人 `npx skills add alex-jb/council-diff` 就装 (17 个 agent 平台 universal)。
+
+council-diff v0.4.0 SKILL.md 已 LIVE。验证 (1 min):
 
 ```bash
-cd /Users/alexji/Desktop/council-diff
-npx skills login        # 一次性 OAuth
-npx skills publish      # 用 skill.json metadata 自动上架
+cd /tmp && mkdir -p skills-verify && cd skills-verify
+npx skills add alex-jb/council-diff
+ls .agents/skills/council-diff/
 ```
 
-第 5 个分发面 + Anthropic Skills standard 时机钩。
+应该看到 `SKILL.md README.md LICENSE` 全装出来。这就是 distribution。
+
+接下来想做的是**让 council-diff 出现在 skills.sh 搜索 / 推荐里** (类似 npm search)。skills.sh 网站现在没有显式 publish API,他们似乎自动 crawl GitHub `SKILL.md` topics。可以 (5 min) 给 council-diff repo 加 GitHub topics: `claude-skill`, `agent-skill`, `skills-sh` 让它 indexable。
 
 ## 📅 今晚 / 明天 — fire council-diff launch drafts (Week 1)
 
