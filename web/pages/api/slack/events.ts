@@ -49,13 +49,14 @@ function formatVerdicts(
   decisionId: string | null,
   persistError: string | null,
   persistDebug: string,
+  domain: Domain = "founder",
 ): string {
   const lines: string[] = [];
   const emoji = recommendationEmoji(result.recommendation);
   const agreementPct = Math.round(result.agreement_score * 100);
 
   lines.push(
-    `*${emoji} Council verdict: ${result.recommendation.toUpperCase()}*   _agreement ${agreementPct}%_`,
+    `*${emoji} Council verdict: ${result.recommendation.toUpperCase()}*   _agreement ${agreementPct}% · \`${domain}\` domain_`,
   );
   lines.push("");
   lines.push(`> ${result.consensus}`);
@@ -92,6 +93,23 @@ function formatVerdicts(
     `_Built on \`council-diff\` v0.4.0 · 5-persona debate + Brier audit at resolution · MIT_`,
   );
   return lines.join("\n");
+}
+
+const VALID_DOMAINS = ["founder", "engineer", "investor", "career", "product", "quant"] as const;
+type Domain = (typeof VALID_DOMAINS)[number];
+
+// Parse optional domain prefix. Accepts both `:investor decision` and `investor decision`.
+// Defaults to "founder" if first token isn't a recognized domain.
+function parseDomain(text: string): { domain: Domain; rest: string } {
+  const trimmed = text.trim();
+  const match = trimmed.match(/^:?([a-z]+)\s+([\s\S]*)/i);
+  if (match) {
+    const candidate = match[1].toLowerCase();
+    if ((VALID_DOMAINS as readonly string[]).includes(candidate)) {
+      return { domain: candidate as Domain, rest: match[2] };
+    }
+  }
+  return { domain: "founder", rest: trimmed };
 }
 
 // Parse "decision text | context goes here" — splits on first unescaped pipe.
@@ -201,26 +219,29 @@ app.command("/council", async ({ command, ack, respond }) => {
       text:
         "_Try one of:_\n" +
         "• `/council should we ship the bigger discount on the enterprise deal?`\n" +
-        "• `/council should we hire a second engineer? | seed-stage, $5K MRR growing 20% MoM, solo founder 18mo runway`\n" +
+        "• `/council :investor long GOOGL into Q3? | Druckenmiller sold all, Berkshire bought $10B`\n" +
+        "• `/council engineer should we adopt Rust for the inference path? | Python hot loop is the bottleneck`\n" +
+        "_Optional domain prefix: `founder` (default) · `engineer` · `investor` · `career` · `product` · `quant`. Use `:` for clarity._\n" +
         "_Add `| context` after the question to feed the council ground truth (raises score quality)._",
     });
     return;
   }
 
-  const { decision, context } = splitDecisionAndContext(raw);
+  const { domain, rest } = parseDomain(raw);
+  const { decision, context } = splitDecisionAndContext(rest);
   const contextHint = context ? ` _(+ context: ${context.length} chars)_` : " _(no context — scores will be conservative)_";
 
   // Immediate fast feedback so user sees the council is working.
   await respond({
     response_type: "ephemeral",
     text:
-      `:brain: *Council convening* on: _${decision}_${contextHint}\n` +
+      `:brain: *Council convening* (\`${domain}\` domain) on: _${decision}_${contextHint}\n` +
       `5 personas debating in parallel — verdicts posting to this channel in ~10s.`,
   });
 
   try {
     const result = await council.deliberate({
-      domain: "founder",
+      domain,
       decision,
       context: context ?? undefined,
     });
@@ -237,7 +258,7 @@ app.command("/council", async ({ command, ack, respond }) => {
     await respond({
       response_type: "in_channel",
       replace_original: false,
-      text: formatVerdicts(result, persist.id, persist.error, persist.debug),
+      text: formatVerdicts(result, persist.id, persist.error, persist.debug, domain),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

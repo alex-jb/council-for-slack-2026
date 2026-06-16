@@ -157,7 +157,7 @@ Built solo over one day during the Splunk + Band of Agents hackathon week (2026-
 - [x] Day 4 — Supabase persist + `/council-audit` history
 - [x] Day 5 — Context pipe + Block Kit resolve buttons + Brier compute
 - [x] Day 6 — **MCP server scaffold** ([`mcp/`](./mcp/)) — same council-diff primitive exposed to Claude Desktop / Cursor / Claude Code (Slack Agent Builder rubric: platform integration ✓)
-- [ ] Day 7 — Multi-domain syntax (`/council:engineer`, `:investor`, `:product`, `:quant`, `:career`)
+- [x] Day 7 — Multi-domain syntax (`/council :investor [decision] | [context]`, also `:engineer` `:product` `:quant` `:career`; `founder` remains the default)
 - [ ] Day 8 — Average Brier over time (per-workspace calibration meta-metric)
 - [ ] Week 2 — OAuth install flow (multi-workspace)
 - [ ] Week 2 — AMD MI300X vLLM backend branch (council-diff `feat/amd-backend`)
