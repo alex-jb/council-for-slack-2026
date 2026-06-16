@@ -41,7 +41,8 @@
         "channels:read",
         "canvases:write",
         "canvases:read",
-        "im:history"
+        "im:history",
+        "app_mentions:read"
       ]
     }
   },
