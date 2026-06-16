@@ -44,6 +44,16 @@ function recommendationEmoji(rec: CouncilResult["recommendation"]): string {
   return ":hourglass_flowing_sand:";
 }
 
+// Canvas markdown parser is stricter than Slack chat — colon-shortcode emoji and
+// <@USERID> mentions can silently drop the surrounding block. Use Unicode emoji
+// and plain text in Canvas content.
+function recommendationEmojiUnicode(rec: CouncilResult["recommendation"]): string {
+  if (rec === "go") return "✅";
+  if (rec === "kill") return "🚫";
+  if (rec === "split") return "⚖️";
+  return "⏳";
+}
+
 function formatVerdicts(
   result: CouncilResult,
   decisionId: string | null,
@@ -256,23 +266,26 @@ async function appendCanvasLog(args: {
   }
   if (!canvasId) return;
 
-  const emoji = recommendationEmoji(result.recommendation);
+  const emoji = recommendationEmojiUnicode(result.recommendation);
   const agreementPct = Math.round(result.agreement_score * 100);
   const ts = new Date().toISOString().slice(0, 16).replace("T", " ");
-  const idTag = decisionId ? ` · ID \`${decisionId}\`` : "";
+  const idTag = decisionId ? ` · ID ${decisionId}` : "";
 
+  // Plain ASCII text + Unicode emoji only. Slack Canvas markdown silently drops
+  // blocks containing certain Slack-style constructs (:shortcode: emoji,
+  // <@USERID> mentions, etc.). Avoid them entirely here.
   const block = [
     "---",
     "",
-    `## ${emoji} ${result.recommendation.toUpperCase()} — *${ts} UTC*`,
+    `## ${emoji} ${result.recommendation.toUpperCase()} — ${ts} UTC`,
     "",
     `> ${decision}`,
     "",
-    `_Domain \`${domain}\` · Agreement ${agreementPct}% · By <@${userId}>${idTag}_`,
+    `Domain ${domain} · Agreement ${agreementPct}% · User ${userId}${idTag}`,
     "",
     result.consensus,
     "",
-    `**Voices** — ${result.voices
+    `**Voices**: ${result.voices
       .map((v) => `${v.voice_display} ${v.score}/100 (${v.verdict})`)
       .join(" · ")}`,
     "",
