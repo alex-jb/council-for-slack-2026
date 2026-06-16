@@ -147,3 +147,37 @@ export async function listRecentDecisions(
   }
   return (data ?? []) as RecentDecision[];
 }
+
+export interface WorkspaceStats {
+  total_decisions: number;
+  resolved_decisions: number;
+  avg_brier_council: number | null;
+  calibration_label: "excellent" | "good" | "fair" | "needs-work" | "pending";
+}
+
+// Day 11 — workspace calibration meta-metric. Surfaced in /council-audit
+// header so teams see their average Brier as a single number that drifts
+// over time. Returns null if the RPC isn't deployed yet (migration 003 not
+// run) — caller should soft-handle null and skip rendering the stats row.
+export async function getWorkspaceStats(
+  workspaceId: string,
+): Promise<WorkspaceStats | null> {
+  const db = getDb();
+  if (!db) return null;
+  const { data, error } = await db.rpc("council_workspace_stats", {
+    p_workspace_id: workspaceId,
+  });
+  if (error) {
+    console.error("[db] getWorkspaceStats failed", error);
+    return null;
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return null;
+  return {
+    total_decisions: Number(row.total_decisions ?? 0),
+    resolved_decisions: Number(row.resolved_decisions ?? 0),
+    avg_brier_council:
+      row.avg_brier_council != null ? Number(row.avg_brier_council) : null,
+    calibration_label: (row.calibration_label ?? "pending") as WorkspaceStats["calibration_label"],
+  };
+}

@@ -5,7 +5,9 @@ import {
   persistDecision,
   listRecentDecisions,
   resolveDecision,
+  getWorkspaceStats,
   type RecentDecision,
+  type WorkspaceStats,
 } from "../../../lib/db";
 
 const signingSecret = process.env.SLACK_SIGNING_SECRET;
@@ -134,7 +136,19 @@ function splitDecisionAndContext(text: string): { decision: string; context: str
 
 type SlackBlock = Record<string, unknown>;
 
-function buildAuditBlocks(rows: RecentDecision[]): SlackBlock[] {
+// Day 11 — emoji per calibration label. Lower Brier = better calibrated.
+function calibrationEmoji(label: WorkspaceStats["calibration_label"]): string {
+  if (label === "excellent") return ":dart:";
+  if (label === "good") return ":green_circle:";
+  if (label === "fair") return ":large_yellow_circle:";
+  if (label === "needs-work") return ":large_orange_circle:";
+  return ":hourglass_flowing_sand:";
+}
+
+function buildAuditBlocks(
+  rows: RecentDecision[],
+  stats: WorkspaceStats | null = null,
+): SlackBlock[] {
   if (rows.length === 0) {
     return [
       {
@@ -156,8 +170,34 @@ function buildAuditBlocks(rows: RecentDecision[]): SlackBlock[] {
         text: `*:scroll: Council audit* — _${rows.length} decision${rows.length === 1 ? "" : "s"} logged, ${resolved} resolved_`,
       },
     },
-    { type: "divider" },
   ];
+
+  // Day 11 — workspace calibration meta-metric. Single number teams compete on.
+  if (stats && stats.resolved_decisions > 0 && stats.avg_brier_council != null) {
+    const emoji = calibrationEmoji(stats.calibration_label);
+    const brierStr = stats.avg_brier_council.toFixed(3);
+    blocks.push({
+      type: "context",
+      elements: [
+        {
+          type: "mrkdwn",
+          text: `${emoji} *Workspace calibration: ${stats.calibration_label}* — _avg Brier ${brierStr} across ${stats.resolved_decisions} resolved · lower is better, 0 perfect, 0.25 chance_`,
+        },
+      ],
+    });
+  } else if (stats && stats.total_decisions > 0 && stats.resolved_decisions === 0) {
+    blocks.push({
+      type: "context",
+      elements: [
+        {
+          type: "mrkdwn",
+          text: `:hourglass_flowing_sand: *Workspace calibration: pending* — _resolve a decision below to unlock your team's Brier score_`,
+        },
+      ],
+    });
+  }
+
+  blocks.push({ type: "divider" });
 
   for (const r of rows) {
     const emoji = recommendationEmoji(r.recommendation);
@@ -381,11 +421,14 @@ app.command("/council", async ({ command, ack, respond, client }) => {
 app.command("/council-audit", async ({ command, ack, respond }) => {
   await ack();
   try {
-    const rows = await listRecentDecisions(command.team_id, 10);
+    const [rows, stats] = await Promise.all([
+      listRecentDecisions(command.team_id, 10),
+      getWorkspaceStats(command.team_id),
+    ]);
     await respond({
       response_type: "ephemeral",
       text: "Council audit",
-      blocks: buildAuditBlocks(rows) as never[],
+      blocks: buildAuditBlocks(rows, stats) as never[],
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -415,13 +458,17 @@ async function handleResolve(
     return;
   }
 
-  // Refresh audit with new state — replace original ephemeral
-  const rows = await listRecentDecisions(workspaceId, 10);
+  // Refresh audit with new state — replace original ephemeral. Fetch stats
+  // alongside so the calibration header reflects the freshly resolved Brier.
+  const [rows, stats] = await Promise.all([
+    listRecentDecisions(workspaceId, 10),
+    getWorkspaceStats(workspaceId),
+  ]);
   await respond({
     response_type: "ephemeral",
     replace_original: true,
     text: "Council audit (updated)",
-    blocks: buildAuditBlocks(rows),
+    blocks: buildAuditBlocks(rows, stats),
   });
 }
 

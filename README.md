@@ -186,7 +186,7 @@ Built solo over one day during the Splunk + Band of Agents hackathon week (2026-
 - [x] Day 8 — **Channel Canvas as decision log** — every `/council` fire auto-appends a Brier-audited entry to the channel's pinned Canvas, so the second-opinion ritual builds a calibrated history visible at the top of every channel. Fire-and-forget; never blocks the user verdict.
 - [x] Day 9 — **"Send to council" message shortcut** — right-click any Slack message → modal with domain picker + optional context → verdict posts as a thread reply on the source message and the Canvas log gets a new entry. The viral wedge for the second-opinion ritual: somebody's hot take in a thread becomes a calibrated decision in two clicks.
 - [x] Day 10 — **Workflow Builder custom step** ([`docs/workflow-builder.md`](./docs/workflow-builder.md)) — "Council deliberate" is now a step non-coder Slack admins drop into any workflow. Same engine as the slash command and MCP server — three surfaces, one council. Third Slack Agent Builder rubric-required tech ✓ (alongside MCP + Canvas).
-- [ ] Day 11 — Average Brier over time (per-workspace calibration meta-metric)
+- [x] Day 11 — **Workspace calibration meta-metric** — `/council-audit` now shows your team's average Brier across all resolved decisions, labelled `excellent` (<0.10) / `good` (<0.20) / `fair` (<0.30) / `needs-work`. Teams compete on a single number that drifts in real-time as decisions land.
 - [ ] Week 2 — OAuth install flow (multi-workspace)
 - [ ] Week 2 — AMD MI300X vLLM backend branch (council-diff `feat/amd-backend`)
 - [ ] Week 3 — 90-sec Loom demo for 7/13 submission
