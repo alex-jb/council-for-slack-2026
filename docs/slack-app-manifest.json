@@ -49,91 +49,14 @@
   "settings": {
     "event_subscriptions": {
       "request_url": "https://council-for-slack.vercel.app/slack/events",
-      "bot_events": ["app_mention", "message.im", "function_executed"]
+      "bot_events": ["app_mention", "message.im"]
     },
     "interactivity": {
       "is_enabled": true,
       "request_url": "https://council-for-slack.vercel.app/slack/events"
     },
-    "function_runtime": "remote",
-    "org_deploy_enabled": true,
+    "org_deploy_enabled": false,
     "socket_mode_enabled": false,
     "token_rotation_enabled": false
-  },
-  "functions": {
-    "council_deliberate": {
-      "title": "Council deliberate",
-      "description": "Convene a 5-persona AI council on a decision and post the verdict to a channel",
-      "input_parameters": {
-        "question": {
-          "type": "string",
-          "title": "Question",
-          "description": "The decision question to deliberate",
-          "is_required": true
-        },
-        "channel_id": {
-          "type": "slack#/types/channel_id",
-          "title": "Channel",
-          "description": "Where to post the council verdict",
-          "is_required": true
-        },
-        "domain": {
-          "type": "string",
-          "title": "Domain",
-          "description": "founder engineer investor career product or quant",
-          "is_required": false
-        },
-        "context": {
-          "type": "string",
-          "title": "Context",
-          "description": "Ground truth numbers constraints dates",
-          "is_required": false
-        },
-        "requester_id": {
-          "type": "slack#/types/user_id",
-          "title": "Requested by",
-          "description": "User who triggered the workflow",
-          "is_required": false
-        }
-      },
-      "output_parameters": {
-        "verdict": {
-          "type": "string",
-          "title": "Verdict",
-          "description": "GO WAIT KILL or SPLIT",
-          "is_required": true
-        },
-        "recommendation": {
-          "type": "string",
-          "title": "Recommendation",
-          "description": "lowercase verdict for conditional steps",
-          "is_required": true
-        },
-        "agreement_score": {
-          "type": "number",
-          "title": "Agreement score",
-          "description": "0 to 1 how much the 5 voices align",
-          "is_required": true
-        },
-        "consensus": {
-          "type": "string",
-          "title": "Consensus",
-          "description": "1-paragraph consensus quote",
-          "is_required": true
-        },
-        "summary": {
-          "type": "string",
-          "title": "Summary",
-          "description": "One-line summary for downstream message steps",
-          "is_required": true
-        },
-        "decision_id": {
-          "type": "string",
-          "title": "Decision ID",
-          "description": "Persistent ID for later audit or resolve",
-          "is_required": false
-        }
-      }
-    }
   }
 }
