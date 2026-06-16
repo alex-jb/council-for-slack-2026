@@ -45,7 +45,37 @@ Type `/council [your question] | [optional context]` in any Slack channel. 5 fou
 
 Later, when the decision plays out:
 
-`/council-audit` shows your decision history with ✅ Happened / ❌ Did not happen buttons. One click triggers Brier-scored calibration audit. Karpathy's "create evaluation loops" job description, literal.
+`/council-audit` shows your decision history with ✅ Happened / ❌ Did not happen buttons. One click triggers Brier-scored calibration audit, and your **workspace calibration meta-metric** updates at the top — a single labelled number (`excellent` < 0.10 / `good` / `fair` / `needs-work`) that drifts in real-time as decisions land. Karpathy's "create evaluation loops" job description, literal.
+
+---
+
+## Three Slack-native surfaces, one engine
+
+Same `council.deliberate()` engine. Three surfaces a Slack admin can compose into the team's workflow without writing code:
+
+| Surface | What it is | Slack Agent Builder rubric tech ✓ |
+|---|---|---|
+| **`/council` slash command** | The one-user-types ritual. Decisions go into the channel where the decision is happening, not into a separate AI tab. | — |
+| **`Send to Council` message shortcut** | Right-click any Slack message → modal → council deliberates and posts the verdict as a threaded reply on the source message. Hot takes become calibrated decisions in two clicks. | — |
+| **`Council deliberate` Workflow Builder step** ([spec](./docs/workflow-builder.md)) | Non-coder admins drop the council into automations. e.g. "when a Jira issue moves to 'needs decision', fire council with the issue body, post verdict to the thread." | **Workflow Builder custom step** ✓ |
+| **Channel Canvas decision log** (auto-pinned) | Every council fire auto-appends a Brier-audited entry to the channel's Canvas. Built-in living "team decision log" judges can scroll through. | **Canvas API** ✓ |
+| **MCP server** ([`mcp/`](./mcp/)) | The same primitive exposed to Claude Desktop / Cursor / Claude Code via Model Context Protocol. Same engine, four surfaces. | **MCP server** ✓ |
+
+3/3 of the Slack Agent Builder Challenge required technologies, all load-bearing — not lipstick.
+
+---
+
+## Who uses this
+
+| Persona | When they fire `/council` | What changes vs a single-LLM answer |
+|---|---|---|
+| **Solo founder / one-person company** | "Should we ship the price hike Tuesday or after the conference?" — no cofounder to bounce off, the decision is real money, can't sleep on it for a week. | YC Partner says GO at 78, Indie CFO says WAIT at 42 because runway-vs-MRR math doesn't math. The 36-point spread is the signal a single LLM erases. Brier audit weeks later tells the founder whose voice to trust on pricing. |
+| **PM in a mid-stage startup** | "Should we build the SAML SSO integration in-house or buy WorkOS?" — every quarter, build/buy decisions are the highest-stakes calls and the easiest to outsource to lazy LLM "should we" prompts. | `:engineer` domain (SRE Oncall, Staff Eng, Security, Cost, IC Skeptic) debates engineering reality. The PM gets a verdict + 5 verbatim concerns + an agreement score before the architectural commitment. |
+| **Eng lead on a vendor selection** | "Pinecone vs pgvector vs self-host Qdrant for the embeddings layer?" — easy to vibe-pick; hard to live with for 18 months. | Activist Short / Sector / Macro personas (`:quant` domain) catch the cost trajectory + lock-in risk the demo deck hid. |
+| **Investment analyst** | "Long GOOGL into Q3? Druckenmiller exited, Berkshire opened $10B" — exactly the live [GOOGL Q3 case study](./docs/case-studies/googl-q3-2026.md). | Per-voice spread of 34 points between Growth VC (72) and Activist Short (38) **is the trade**: right idea, wrong size. A single-LLM answer would pick one narrative and hide the binary. |
+| **CTO making an org call** | "Should we lay off the EU team or relocate them?" — high-stakes, irreversible, emotional. | The council surfaces the 5 framings (legal, runway, culture, hiring market, customer trust) before the all-hands. The Canvas log makes the decision auditable when the board asks 6 months later. |
+
+Common shape: **the decision is real**, the question is **hard but well-formed**, and the team needs **the disagreement on record** before the call is made. That's the wedge single-LLM tools structurally can't fill.
 
 ---
 
