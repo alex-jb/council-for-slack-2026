@@ -278,6 +278,12 @@ Built solo over one day during the Splunk + Band of Agents hackathon week (2026-
 
 MIT — see [LICENSE](./LICENSE).
 
+## Policies (for Slack distribution + Devpost review)
+
+- **Privacy**: [council-for-slack.vercel.app/privacy](https://council-for-slack.vercel.app/privacy) — what Council stores, where (Supabase, RLS deny-all + 7 SECURITY DEFINER RPCs), what gets sent to Anthropic, no sale / no ads / no cross-workspace, how to delete.
+- **Support**: [council-for-slack.vercel.app/support](https://council-for-slack.vercel.app/support) — 3-command quick reference, how to file an issue, 4 common questions including Brier math, 24h response SLA.
+- **Live workspace count**: [council-for-slack.vercel.app/installed?status=ok&team=test](https://council-for-slack.vercel.app/installed?status=ok&team=test) — pulls from `council_installation_count()` RPC in real time, displays "Council is live in N workspaces today" below the success message.
+
 ## Author
 
 Alex Ji ([@alex-jb](https://github.com/alex-jb)). Building [VibeXForge](https://vibexforge.com) and an 11-agent [Solo Founder OS](https://github.com/alex-jb/solo-founder-os) stack.
