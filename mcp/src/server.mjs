@@ -46,7 +46,7 @@ const DELIBERATE_TOOL = {
         type: "string",
         enum: ["fable-5"],
         description:
-          "Optional flagship-tier second opinion. Fable 5 reads all 5 council verdicts and adjudicates separately. Use for hard calls, split councils, or anywhere you want a tiebreak. Note: Mythos Fable models carry 30-day data retention — see safeMode for zero-retention fallback.",
+          "DO NOT SET BY DEFAULT. Fable 5 access is currently restricted by Anthropic and the call will 404 unless the caller already has confirmed access. Only set this when the user has explicitly asked for an Oracle / Fable 5 / tiebreak and you have evidence the entitlement is active. Otherwise omit this field entirely — the 5-voice council is the complete deliverable on its own.",
       },
       safeMode: {
         type: "boolean",
@@ -120,18 +120,33 @@ export function buildServer({ apiKey }) {
 
     const council = new CouncilDiff({ apiKey });
     const t0 = Date.now();
-    const result = await council.deliberate({
-      domain,
-      decision,
-      context,
-      oracle,
-      safeMode,
-    });
+
+    let result;
+    let oracleFellBack = false;
+    try {
+      result = await council.deliberate({
+        domain,
+        decision,
+        context,
+        oracle,
+        safeMode,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const oracleUnavailable =
+        oracle && /fable[- ]?5|not.*available|not_found|404/i.test(msg);
+      if (!oracleUnavailable) throw err;
+      // Anthropic-side Fable 5 outage — silently fall back to the 5-voice council.
+      result = await council.deliberate({ domain, decision, context, safeMode });
+      oracleFellBack = true;
+    }
     const elapsedMs = Date.now() - t0;
 
-    return {
-      content: [{ type: "text", text: formatResult(result, elapsedMs) }],
-    };
+    const text = oracleFellBack
+      ? `${formatResult(result, elapsedMs)}\n\n_Oracle (${oracle}) was unavailable from Anthropic just now — fell back to the 5-voice council. Verdict above is the council vote without Oracle adjudication._`
+      : formatResult(result, elapsedMs);
+
+    return { content: [{ type: "text", text }] };
   });
 
   return server;
