@@ -48,6 +48,20 @@ Later, when the decision plays out:
 
 ---
 
+## Live case study
+
+**[GOOGL Q3 2026 — Druckenmiller vs Berkshire](./docs/case-studies/googl-q3-2026.md)** (fired 2026-06-15)
+
+Q1 2026: Druckenmiller exited GOOGL entirely. Berkshire opened a new ~$10B position. Ben Thompson [framed it](https://stratechery.com/2026/the-google-capital-company/) as "The Google Capital Company." Single-LLM verdict would pick a side. The council exposed the disagreement directly.
+
+- **Recommendation**: `WAIT` · Agreement: `0.78`
+- **Per-voice spread**: Activist Short 38/100 ↔ Growth VC 72/100
+- **Consensus quote**: *"The smart-money divergence is the single most important data point — this is a 'right idea, wrong size' situation until antitrust resolution clarifies the structural picture."*
+
+That 34-point spread between two professional perspectives is the signal a single-LLM answer erases. [Read the full case study →](./docs/case-studies/googl-q3-2026.md)
+
+---
+
 ## How it works
 
 ```
