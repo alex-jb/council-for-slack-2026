@@ -209,7 +209,91 @@ function buildAuditBlocks(rows: RecentDecision[]): SlackBlock[] {
   return blocks;
 }
 
-app.command("/council", async ({ command, ack, respond }) => {
+// Append a decision summary to the channel's pinned canvas — the "decision log"
+// users see at the top of every channel as a calibrated history of /council fires.
+// Skips silently for DMs (which have no channel canvas) and on any Slack error
+// (missing scope, rate limit, etc.) so the user-facing verdict is never blocked.
+async function appendCanvasLog(args: {
+  client: any;
+  channelId: string;
+  decision: string;
+  domain: Domain;
+  result: CouncilResult;
+  decisionId: string | null;
+  userId: string;
+}) {
+  const { client, channelId, decision, domain, result, decisionId, userId } = args;
+
+  // Channel IDs start with C; DMs start with D, group DMs with G. Canvases attach only to channels.
+  if (!channelId.startsWith("C")) return;
+
+  let canvasId: string | null = null;
+  try {
+    const created = await client.apiCall("conversations.canvases.create", {
+      channel_id: channelId,
+      title: "Council decisions",
+      document_content: {
+        type: "markdown",
+        markdown:
+          "# Council decisions\n\n_A Brier-audited log of `/council` deliberations in this channel. Every entry is timestamped; verdicts get scored against reality at resolution time._\n\n",
+      },
+    });
+    canvasId = (created as { canvas_id?: string }).canvas_id ?? null;
+  } catch (err: unknown) {
+    const data = (err as { data?: { error?: string } })?.data;
+    if (data?.error === "channel_canvas_already_exists") {
+      const info = await client.apiCall("conversations.info", {
+        channel: channelId,
+        include_properties: true,
+      });
+      canvasId =
+        ((info as { channel?: { properties?: { canvas?: { file_id?: string } } } })
+          .channel?.properties?.canvas?.file_id) ?? null;
+    } else {
+      console.error("[canvas] create failed", err);
+      return;
+    }
+  }
+  if (!canvasId) return;
+
+  const emoji = recommendationEmoji(result.recommendation);
+  const agreementPct = Math.round(result.agreement_score * 100);
+  const ts = new Date().toISOString().slice(0, 16).replace("T", " ");
+  const idTag = decisionId ? ` · ID \`${decisionId}\`` : "";
+
+  const block = [
+    "---",
+    "",
+    `## ${emoji} ${result.recommendation.toUpperCase()} — *${ts} UTC*`,
+    "",
+    `> ${decision}`,
+    "",
+    `_Domain \`${domain}\` · Agreement ${agreementPct}% · By <@${userId}>${idTag}_`,
+    "",
+    result.consensus,
+    "",
+    `**Voices** — ${result.voices
+      .map((v) => `${v.voice_display} ${v.score}/100 (${v.verdict})`)
+      .join(" · ")}`,
+    "",
+  ].join("\n");
+
+  try {
+    await client.apiCall("canvases.edit", {
+      canvas_id: canvasId,
+      changes: [
+        {
+          operation: "insert_at_end",
+          document_content: { type: "markdown", markdown: block },
+        },
+      ],
+    });
+  } catch (err: unknown) {
+    console.error("[canvas] edit failed", err);
+  }
+}
+
+app.command("/council", async ({ command, ack, respond, client }) => {
   await ack();
 
   const raw = command.text?.trim();
@@ -260,6 +344,17 @@ app.command("/council", async ({ command, ack, respond }) => {
       replace_original: false,
       text: formatVerdicts(result, persist.id, persist.error, persist.debug, domain),
     });
+
+    // Fire-and-forget canvas append. Failures stay in server logs; never block the user.
+    appendCanvasLog({
+      client,
+      channelId: command.channel_id,
+      decision,
+      domain,
+      result,
+      decisionId: persist.id,
+      userId: command.user_id,
+    }).catch((err) => console.error("[canvas] background append rejected", err));
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[/council] deliberation failed", err);

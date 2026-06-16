@@ -158,7 +158,8 @@ Built solo over one day during the Splunk + Band of Agents hackathon week (2026-
 - [x] Day 5 — Context pipe + Block Kit resolve buttons + Brier compute
 - [x] Day 6 — **MCP server scaffold** ([`mcp/`](./mcp/)) — same council-diff primitive exposed to Claude Desktop / Cursor / Claude Code (Slack Agent Builder rubric: platform integration ✓)
 - [x] Day 7 — Multi-domain syntax (`/council :investor [decision] | [context]`, also `:engineer` `:product` `:quant` `:career`; `founder` remains the default)
-- [ ] Day 8 — Average Brier over time (per-workspace calibration meta-metric)
+- [x] Day 8 — **Channel Canvas as decision log** — every `/council` fire auto-appends a Brier-audited entry to the channel's pinned Canvas, so the second-opinion ritual builds a calibrated history visible at the top of every channel. Fire-and-forget; never blocks the user verdict.
+- [ ] Day 9 — Average Brier over time (per-workspace calibration meta-metric)
 - [ ] Week 2 — OAuth install flow (multi-workspace)
 - [ ] Week 2 — AMD MI300X vLLM backend branch (council-diff `feat/amd-backend`)
 - [ ] Week 3 — 90-sec Loom demo for 7/13 submission
