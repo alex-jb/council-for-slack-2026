@@ -1,13 +1,13 @@
 # Council for Slack
 
+> English · [中文](./README.zh-CN.md)
+
 > **The second-opinion ritual for Slack teams.**
 > 5 voices, 1 verdict, every voice scored against reality at resolution. 10 seconds and ~$0.03 a fire.
 
 Every team already has the *informal* ritual: before a real decision ships, somebody DMs three trusted people and asks "what would you do?". The replies disagree. The disagreement is the signal. Council makes that ritual native to the channel where the decision is happening, then keeps score.
 
 Built on [council-diff](https://github.com/alex-jb/council-diff) v0.4.0 (OSS, MIT, on npm). Targeting [Slack Agent Builder Challenge](https://slackcommunity.com/challenges/agent-builder) 2026-07-13.
-
-> 中文 README 路上 (`README.zh-CN.md` Week 2 ship).
 
 ---
 
