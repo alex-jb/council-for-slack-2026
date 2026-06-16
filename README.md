@@ -5,6 +5,26 @@
 > **The second-opinion ritual for Slack teams.**
 > 5 voices, 1 verdict, every voice scored against reality at resolution. 10 seconds and ~$0.03 a fire.
 
+<details>
+<summary><b>👋 For Slack Agent Builder Challenge judges — 3-minute tour</b></summary>
+
+**Skip to what matters first**:
+
+1. **Three rubric-required technologies, all load-bearing** (not lipstick):
+   - **Workflow Builder custom step** (`council_deliberate`) — spec at [`docs/workflow-builder.md`](./docs/workflow-builder.md), handler at [`web/pages/api/slack/events.ts`](./web/pages/api/slack/events.ts#L450)
+   - **MCP server** — wrapper at [`mcp/src/server.mjs`](./mcp/src/server.mjs) exposing `council_deliberate` to Claude Desktop / Cursor / Claude Code
+   - **Channel Canvas** — auto-pinned decision log at [`appendCanvasLog()`](./web/pages/api/slack/events.ts#L226)
+2. **Four real `council.deliberate()` fires demonstrate the engine isn't a one-off** — see ["Live case studies"](#live-case-studies--four-real-fires-full-verdict-spectrum) for GO 0.89 / KILL 0.94 / two flavors of WAIT covering the full spectrum
+3. **Brier audit at resolution** is the calibration moat — `/council-audit` shows the workspace's average Brier as a single labelled number, drifting in real-time as decisions land
+4. **60-second demo** opens on the Brier audit (not the deliberation) per your rubric guidance — script at [`docs/loom-script.md`](./docs/loom-script.md), workspace pre-stage at [`docs/loom-pre-stage-workspace.md`](./docs/loom-pre-stage-workspace.md)
+5. **Devpost submission copy** ready in [`docs/devpost-submission.md`](./docs/devpost-submission.md). Day-by-day ship log in [`CHANGELOG.md`](./CHANGELOG.md)
+
+**If you have 60 more seconds**: the README "[Who uses this](#who-uses-this)" table pairs 5 personas with what changes for them vs a single-LLM answer.
+
+**If you have 5 more minutes**: pick any one case study below. The 4 of them together prove the agreement score is the calibration signal — not noise.
+
+</details>
+
 Every team already has the *informal* ritual: before a real decision ships, somebody DMs three trusted people and asks "what would you do?". The replies disagree. The disagreement is the signal. Council makes that ritual native to the channel where the decision is happening, then keeps score.
 
 Built on [council-diff](https://github.com/alex-jb/council-diff) v0.4.0 (OSS, MIT, on npm). Targeting [Slack Agent Builder Challenge](https://slackcommunity.com/challenges/agent-builder) 2026-07-13.
