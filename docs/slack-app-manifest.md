@@ -67,15 +67,21 @@ settings:
   token_rotation_enabled: false
 
 # Day 9 — message-action shortcut "Send to council"
-# In the Slack app config UI: Interactivity & Shortcuts → "Create New Shortcut" → "On messages"
-#   Name: Send to council
-#   Short description: Get a 5-persona AI council to deliberate on this message
-#   Callback ID: send_to_council
-shortcuts:
-  - name: Send to council
-    type: message
-    callback_id: send_to_council
-    description: Get a 5-persona AI council to deliberate on this message
+# NOTE 2026-06-16: shortcuts MUST live under features.shortcuts, NOT top-level.
+# Slack rejected `shortcuts` at root with "Invalid additional property: shortcuts".
+# This is documented inconsistently in Slack's own examples — trust the validator.
+# Move this `shortcuts:` block under the `features:` block above (sibling of
+# `bot_user:` and `slash_commands:`).
+#
+# If you're reading this in the YAML manifest editor, the block is already
+# correctly placed in `docs/slack-app-manifest.json` (canonical source).
+# YAML version preserved here for documentation; copy-paste at your own risk.
+#
+# shortcuts (CORRECT location: inside features:):
+#   - name: Send to council
+#     type: message
+#     callback_id: send_to_council
+#     description: Get a 5-persona AI council to deliberate on this message
 
 # Day 10 — Workflow Builder custom function "Council deliberate"
 # Non-coder Slack admins can drop this into any Workflow Builder workflow.
