@@ -106,17 +106,27 @@ Common shape: **the decision is real**, the question is **hard but well-formed**
 
 ---
 
-## Live case study
+## Live case studies — same engine, opposite shape
 
-**[GOOGL Q3 2026 — Druckenmiller vs Berkshire](./docs/case-studies/googl-q3-2026.md)** (fired 2026-06-15)
+Two real `council.deliberate()` fires from 2026-06. The first surfaces disagreement on a hard call; the second surfaces consensus on a clean call. Same engine, opposite output, both correct.
+
+### 1. [GOOGL Q3 2026 — Druckenmiller vs Berkshire](./docs/case-studies/googl-q3-2026.md) (fired 2026-06-15)
 
 Q1 2026: Druckenmiller exited GOOGL entirely. Berkshire opened a new ~$10B position. Ben Thompson [framed it](https://stratechery.com/2026/the-google-capital-company/) as "The Google Capital Company." Single-LLM verdict would pick a side. The council exposed the disagreement directly.
 
 - **Recommendation**: `WAIT` · Agreement: `0.78`
-- **Per-voice spread**: Activist Short 38/100 ↔ Growth VC 72/100
+- **Per-voice spread**: Activist Short 38/100 ↔ Growth VC 72/100 (**34-point gap**)
 - **Consensus quote**: *"The smart-money divergence is the single most important data point — this is a 'right idea, wrong size' situation until antitrust resolution clarifies the structural picture."*
 
-That 34-point spread between two professional perspectives is the signal a single-LLM answer erases. [Read the full case study →](./docs/case-studies/googl-q3-2026.md)
+### 2. [Annual billing at "2 months free"](./docs/case-studies/annual-billing-2026-06.md) (fired 2026-06-16)
+
+Universal SaaS founder decision: 40% of churn is involuntary card-decline, competitors see 18% annual opt-in, 2 days engineering, infrastructure already in place. Single-LLM would either over-caution or rubber-stamp.
+
+- **Recommendation**: `GO` · Agreement: `0.89`
+- **Per-voice spread**: VC Skeptic 72/100 ↔ YC Partner 88/100 (**16-point gap, half of GOOGL**)
+- **Consensus quote**: *"The decision is unusually clean: a 2-day engineering effort addresses a quantified, mechanical churn problem using infrastructure already in place, with validated demand signals both internally and from competitor benchmarks."*
+
+**The contrast is the proof.** The council doesn't pick a side it likes. The math of the question determines the math of the verdict. Hard call → wide voice spread → low agreement → `WAIT`. Clean call → tight voice spread → high agreement → `GO`. The agreement score is the calibration signal.
 
 ---
 
