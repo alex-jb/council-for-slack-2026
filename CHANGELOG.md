@@ -2,6 +2,24 @@
 
 Council for Slack — ship log. Days numbered from the Splunk + Band of Agents hackathon week kickoff (2026-06-13). Format follows Keep-a-Changelog ish; targeted at hackathon judges reviewing daily progression.
 
+## Day 11.75 — 2026-06-16 late night / distribution + telemetry
+
+### Added
+
+- **`/installed` real-time workspace counter** — pulls from new `council_installation_count()` SECURITY DEFINER RPC (count of `council.installations` with `uninstalled_at IS NULL`). Renders "Council is live in N workspaces today" below the success message. SSR, no JS hydration, free social proof for Devpost judges.
+- **`/privacy` page** (static SSG) — Slack distribution-required policy URL. Explains storage (Supabase RLS deny-all + 7 SECURITY DEFINER RPCs), what gets sent to Anthropic + Mythos `safeMode` opt-out, no sale / no ads / no cross-workspace / no DM scanning, and how to delete via uninstall.
+- **`/support` page** (static SSG) — 3-command quick reference (`/council`, `/council :domain`, `/council-audit`), how to file an issue, 4 common FAQs (Brier math / convergence / custom personas / export), 24h response SLA, uninstall path.
+- **Enriched `/api/health`** — returns `{ok, service, version, ts, workspaces, decisions_total, decisions_resolved, avg_brier, calibration}` instead of just `{ok}`. Pulls live counts via `council_workspace_stats()` + `council_installation_count()`. Devpost judge `curl council-for-slack.vercel.app/api/health` immediately sees production telemetry.
+- README Policies section linking `/privacy`, `/support`, and the live install counter so Slack reviewers + judges land on the right URLs.
+
+### Fixed
+- council-diff dependency bumped from `0.4.0` (Anthropic SDK CVE GHSA-p7fg-763f-g4gf) to GitHub tag `v0.4.2` (audit-clean). `npm audit` now reports 0 vulns from council-diff. Postcss < 8.5.10 transitive vuln from Next.js 16.2.9 remains upstream — accepted as not-runtime-exploitable.
+- README version refs synced to council-diff `v0.4.2` (was `v0.4.0`) and Supabase RPC count updated to 7 (was 3).
+
+### Operations
+- Slack App Distribution **enabled** by Alex via Manage Distribution → Activate Public Distribution. AJ Bot workspace `T0BAKDLM11R` installed via OAuth as the first end-to-end test. `council.installations` table has 1 row with 10 scopes.
+- Vercel project linked to GitHub repo for auto-deploy. Previous 4 commits had stuck in queue because the project was unlinked; manual `vercel --prod` unblocked the install-count + /privacy + /support deploys.
+
 ## Day 11.5 — 2026-06-16 evening
 
 ### Added
