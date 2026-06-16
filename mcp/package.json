@@ -1,0 +1,29 @@
+{
+  "name": "council-for-slack-mcp",
+  "version": "0.1.0",
+  "private": false,
+  "description": "MCP server wrapping council-diff — 5-persona AI council as a Claude Desktop / Cursor / Claude Code tool. Companion to Council for Slack (Slack Agent Builder Challenge 2026-07-13).",
+  "type": "module",
+  "license": "MIT",
+  "author": "Alex Ji",
+  "homepage": "https://github.com/alex-jb/council-for-slack-2026/tree/main/mcp",
+  "bin": {
+    "council-mcp": "./bin/cli.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node ./bin/cli.mjs",
+    "smoke": "node ./bin/cli.mjs --smoke"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "council-diff": "^0.4.0"
+  }
+}

@@ -40,9 +40,12 @@ Later, when the decision plays out:
 |---|---|
 | Single-LLM "should I do X?" gives 1 confident answer | 5 voices openly disagree — disagreement *is* signal |
 | Karpathy's LLM Council UI (browser gallery) | Slack-native, where decisions actually happen |
+| [0xNyk/council-of-high-intelligence](https://github.com/0xNyk/council-of-high-intelligence) — 18 generic personas (Aristotle / Feynman / Torvalds) in a Claude Code CLI, no resolution audit | 30 **domain-typed** personas (YC Partner / VC Skeptic / Macro / SRE Oncall) running **in Slack** with **Brier audit at resolution** |
 | No accountability after the call | Brier audit at resolution — calibration tracked over time |
 | Context-free questions get fake confidence | `\| context` pipe feeds personas ground truth → honest scores |
 | Provider-locked | council-diff is provider-pluggable (Anthropic default, AMD MI300X branch landing) |
+
+**One-line frame**: theirs is a CLI deliberation engine. Ours is a calibrated decision platform. *"What would Aristotle think?"* versus *"Should we ship this Tuesday — and was the answer right?"*
 
 **Validation**: Same exact question scored `WAIT 77%` without context, `GO 87%` with context. The personas correctly punish lazy questions and reward grounded ones.
 
@@ -153,8 +156,9 @@ Built solo over one day during the Splunk + Band of Agents hackathon week (2026-
 - [x] Day 3 — 5-persona deliberation live in Slack
 - [x] Day 4 — Supabase persist + `/council-audit` history
 - [x] Day 5 — Context pipe + Block Kit resolve buttons + Brier compute
-- [ ] Day 6 — Multi-domain syntax (`/council:engineer`, `:investor`, `:product`, `:quant`, `:career`)
-- [ ] Day 7 — Average Brier over time (per-workspace calibration meta-metric)
+- [x] Day 6 — **MCP server scaffold** ([`mcp/`](./mcp/)) — same council-diff primitive exposed to Claude Desktop / Cursor / Claude Code (Slack Agent Builder rubric: platform integration ✓)
+- [ ] Day 7 — Multi-domain syntax (`/council:engineer`, `:investor`, `:product`, `:quant`, `:career`)
+- [ ] Day 8 — Average Brier over time (per-workspace calibration meta-metric)
 - [ ] Week 2 — OAuth install flow (multi-workspace)
 - [ ] Week 2 — AMD MI300X vLLM backend branch (council-diff `feat/amd-backend`)
 - [ ] Week 3 — 90-sec Loom demo for 7/13 submission
