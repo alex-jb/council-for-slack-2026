@@ -10,6 +10,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.2",
     "@slack/bolt": "^4.7.3",
+    "@supabase/supabase-js": "^2.108.2",
     "council-diff": "^0.4.0",
     "next": "16.2.9",
     "react": "19.2.4",
