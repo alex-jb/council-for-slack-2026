@@ -4,6 +4,7 @@ import { CouncilDiff, type CouncilResult } from "council-diff";
 import {
   persistDecision,
   listRecentDecisions,
+  resolveDecision,
   type RecentDecision,
 } from "../../../lib/db";
 
@@ -93,60 +94,127 @@ function formatVerdicts(
   return lines.join("\n");
 }
 
-function formatAuditList(rows: RecentDecision[]): string {
+// Parse "decision text | context goes here" — splits on first unescaped pipe.
+function splitDecisionAndContext(text: string): { decision: string; context: string | null } {
+  const idx = text.indexOf("|");
+  if (idx === -1) return { decision: text.trim(), context: null };
+  return {
+    decision: text.slice(0, idx).trim(),
+    context: text.slice(idx + 1).trim() || null,
+  };
+}
+
+type SlackBlock = Record<string, unknown>;
+
+function buildAuditBlocks(rows: RecentDecision[]): SlackBlock[] {
   if (rows.length === 0) {
-    return (
-      "*:scroll: Council audit*\n" +
-      "_No decisions logged yet for this workspace. Try `/council [your question]` first._"
-    );
+    return [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: "*:scroll: Council audit*\n_No decisions logged yet for this workspace. Try `/council [your question]` first._",
+        },
+      },
+    ];
   }
+
   const resolved = rows.filter((r) => r.resolved_at).length;
-  const lines: string[] = [];
-  lines.push(
-    `*:scroll: Council audit* — _${rows.length} decision${rows.length === 1 ? "" : "s"} logged, ${resolved} resolved_`,
-  );
-  lines.push("");
+  const blocks: SlackBlock[] = [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*:scroll: Council audit* — _${rows.length} decision${rows.length === 1 ? "" : "s"} logged, ${resolved} resolved_`,
+      },
+    },
+    { type: "divider" },
+  ];
+
   for (const r of rows) {
     const emoji = recommendationEmoji(r.recommendation);
     const agreement = Math.round(Number(r.agreement_score) * 100);
     const when = new Date(r.created_at).toISOString().slice(0, 10);
-    const status = r.resolved_at
-      ? r.outcome === "happened"
-        ? ":white_check_mark: happened"
-        : ":x: did not happen"
-      : ":hourglass_flowing_sand: pending resolve";
-    const brier =
-      r.brier_council != null ? ` · Brier ${Number(r.brier_council).toFixed(3)}` : "";
-    const truncated = r.question.length > 90 ? r.question.slice(0, 90) + "…" : r.question;
+    const truncated = r.question.length > 100 ? r.question.slice(0, 100) + "…" : r.question;
 
-    lines.push(`\`${r.id.slice(0, 8)}\` ${emoji} *${r.recommendation.toUpperCase()}* · ${agreement}% · ${when}`);
-    lines.push(`> ${truncated}`);
-    lines.push(`   ${status}${brier}`);
-    lines.push("");
+    const header = `\`${r.id.slice(0, 8)}\` ${emoji} *${r.recommendation.toUpperCase()}* · ${agreement}% · ${when}\n> ${truncated}`;
+    blocks.push({
+      type: "section",
+      text: { type: "mrkdwn", text: header },
+    });
+
+    if (r.resolved_at) {
+      const outcomeText =
+        r.outcome === "happened" ? ":white_check_mark: *Happened*" : ":x: *Did not happen*";
+      const brierText =
+        r.brier_council != null ? ` · Brier _${Number(r.brier_council).toFixed(3)}_` : "";
+      blocks.push({
+        type: "context",
+        elements: [
+          { type: "mrkdwn", text: `${outcomeText}${brierText} _(lower Brier = better calibrated, 0 perfect, 0.25 chance)_` },
+        ],
+      });
+    } else {
+      blocks.push({
+        type: "actions",
+        block_id: `resolve_${r.id}`,
+        elements: [
+          {
+            type: "button",
+            text: { type: "plain_text", text: ":white_check_mark: Happened", emoji: true },
+            value: r.id,
+            action_id: "resolve_happened",
+            style: "primary",
+          },
+          {
+            type: "button",
+            text: { type: "plain_text", text: ":x: Did not happen", emoji: true },
+            value: r.id,
+            action_id: "resolve_did_not_happen",
+            style: "danger",
+          },
+        ],
+      });
+    }
+    blocks.push({ type: "divider" });
   }
-  lines.push(
-    "_Day 5: resolve a decision with `/council-resolve <id> happened|did_not_happen` to trigger Brier scoring._",
-  );
-  return lines.join("\n");
+
+  blocks.push({
+    type: "context",
+    elements: [
+      {
+        type: "mrkdwn",
+        text: "_Resolve unlocks Brier audit — calibration tracked across all your decisions over time._",
+      },
+    ],
+  });
+  return blocks;
 }
 
 app.command("/council", async ({ command, ack, respond }) => {
   await ack();
 
-  const decision = command.text?.trim();
-  if (!decision) {
+  const raw = command.text?.trim();
+  if (!raw) {
     await respond({
       response_type: "ephemeral",
-      text: "_Try: `/council should we ship the bigger discount on the enterprise deal?`_",
+      text:
+        "_Try one of:_\n" +
+        "• `/council should we ship the bigger discount on the enterprise deal?`\n" +
+        "• `/council should we hire a second engineer? | seed-stage, $5K MRR growing 20% MoM, solo founder 18mo runway`\n" +
+        "_Add `| context` after the question to feed the council ground truth (raises score quality)._",
     });
     return;
   }
+
+  const { decision, context } = splitDecisionAndContext(raw);
+  const contextHint = context ? ` _(+ context: ${context.length} chars)_` : " _(no context — scores will be conservative)_";
 
   // Immediate fast feedback so user sees the council is working.
   await respond({
     response_type: "ephemeral",
     text:
-      `:brain: *Council convening* on: _${decision}_\n` +
+      `:brain: *Council convening* on: _${decision}_${contextHint}\n` +
       `5 personas debating in parallel — verdicts posting to this channel in ~10s.`,
   });
 
@@ -154,6 +222,7 @@ app.command("/council", async ({ command, ack, respond }) => {
     const result = await council.deliberate({
       domain: "founder",
       decision,
+      context: context ?? undefined,
     });
 
     const persist = await persistDecision({
@@ -161,6 +230,7 @@ app.command("/council", async ({ command, ack, respond }) => {
       slack_user_id: command.user_id,
       slack_channel_id: command.channel_id,
       question: decision,
+      context,
       result,
     });
 
@@ -185,7 +255,8 @@ app.command("/council-audit", async ({ command, ack, respond }) => {
     const rows = await listRecentDecisions(command.team_id, 10);
     await respond({
       response_type: "ephemeral",
-      text: formatAuditList(rows),
+      text: "Council audit",
+      blocks: buildAuditBlocks(rows) as never[],
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -195,6 +266,46 @@ app.command("/council-audit", async ({ command, ack, respond }) => {
       text: `:x: Audit error: \`${message}\``,
     });
   }
+});
+
+async function handleResolve(
+  ack: () => Promise<void>,
+  respond: (msg: Record<string, unknown>) => Promise<unknown>,
+  workspaceId: string,
+  decisionId: string,
+  outcome: "happened" | "did_not_happen",
+) {
+  await ack();
+  const result = await resolveDecision(decisionId, workspaceId, outcome);
+  if (result.error) {
+    await respond({
+      response_type: "ephemeral",
+      replace_original: false,
+      text: `:x: Resolve failed: \`${result.error}\``,
+    });
+    return;
+  }
+
+  // Refresh audit with new state — replace original ephemeral
+  const rows = await listRecentDecisions(workspaceId, 10);
+  await respond({
+    response_type: "ephemeral",
+    replace_original: true,
+    text: "Council audit (updated)",
+    blocks: buildAuditBlocks(rows),
+  });
+}
+
+app.action("resolve_happened", async ({ ack, body, action, respond }) => {
+  const workspaceId = (body as { team?: { id?: string } }).team?.id ?? "";
+  const decisionId = (action as { value?: string }).value ?? "";
+  await handleResolve(ack, respond, workspaceId, decisionId, "happened");
+});
+
+app.action("resolve_did_not_happen", async ({ ack, body, action, respond }) => {
+  const workspaceId = (body as { team?: { id?: string } }).team?.id ?? "";
+  const decisionId = (action as { value?: string }).value ?? "";
+  await handleResolve(ack, respond, workspaceId, decisionId, "did_not_happen");
 });
 
 app.event("app_mention", async ({ event, say }) => {

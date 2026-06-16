@@ -31,6 +31,7 @@ export interface PersistDecisionInput {
   slack_user_id: string;
   slack_channel_id: string;
   question: string;
+  context: string | null;
   result: CouncilResult;
 }
 
@@ -60,6 +61,7 @@ export async function persistDecision(input: PersistDecisionInput): Promise<Pers
       p_recommendation: input.result.recommendation,
       p_agreement_score: input.result.agreement_score,
       p_oracle: input.result.oracle ?? null,
+      p_context: input.context,
     });
     if (error) {
       return {
@@ -82,6 +84,7 @@ export async function persistDecision(input: PersistDecisionInput): Promise<Pers
 export interface RecentDecision {
   id: string;
   question: string;
+  context: string | null;
   domain: string;
   recommendation: "go" | "wait" | "kill" | "split";
   agreement_score: number;
@@ -90,6 +93,42 @@ export interface RecentDecision {
   resolved_at: string | null;
   outcome: "happened" | "did_not_happen" | null;
   brier_council: number | null;
+}
+
+export interface ResolveResult {
+  id: string | null;
+  brier_council: number | null;
+  brier_voices: Record<string, number> | null;
+  error: string | null;
+}
+
+export async function resolveDecision(
+  decisionId: string,
+  workspaceId: string,
+  outcome: "happened" | "did_not_happen",
+): Promise<ResolveResult> {
+  const db = getDb();
+  if (!db) return { id: null, brier_council: null, brier_voices: null, error: "no-db" };
+  try {
+    const { data, error } = await db.rpc("council_decision_resolve", {
+      p_id: decisionId,
+      p_workspace_id: workspaceId,
+      p_outcome: outcome,
+    });
+    if (error) {
+      return { id: null, brier_council: null, brier_voices: null, error: `${error.code ?? "?"}: ${error.message ?? "unknown"}` };
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return { id: null, brier_council: null, brier_voices: null, error: "no-row" };
+    return {
+      id: row.id as string,
+      brier_council: Number(row.brier_council),
+      brier_voices: row.brier_voices as Record<string, number>,
+      error: null,
+    };
+  } catch (err) {
+    return { id: null, brier_council: null, brier_voices: null, error: err instanceof Error ? err.message : String(err) };
+  }
 }
 
 export async function listRecentDecisions(
