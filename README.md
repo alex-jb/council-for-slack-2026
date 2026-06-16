@@ -36,7 +36,7 @@
 
 Every team already has the *informal* ritual: before a real decision ships, somebody DMs three trusted people and asks "what would you do?". The replies disagree. The disagreement is the signal. Council makes that ritual native to the channel where the decision is happening, then keeps score.
 
-Built on [council-diff](https://github.com/alex-jb/council-diff) v0.4.0 (OSS, MIT, on npm). Targeting [Slack Agent Builder Challenge](https://slackcommunity.com/challenges/agent-builder) 2026-07-13.
+Built on [council-diff](https://github.com/alex-jb/council-diff) v0.4.0 (OSS, MIT, on npm + distributed across 71 AI agent platforms via skills.sh). Targeting [Slack Agent Builder Challenge](https://slackcommunity.com/challenges/agent-builder) 2026-07-13.
 
 ---
 
