@@ -40,14 +40,15 @@
         "channels:history",
         "channels:read",
         "canvases:write",
-        "canvases:read"
+        "canvases:read",
+        "im:history"
       ]
     }
   },
   "settings": {
     "event_subscriptions": {
       "request_url": "https://council-for-slack.vercel.app/slack/events",
-      "bot_events": ["app_mention", "message.im"]
+      "bot_events": ["app_mention", "message.im", "function_executed"]
     },
     "interactivity": {
       "is_enabled": true,
