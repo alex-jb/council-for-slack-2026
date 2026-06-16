@@ -5,6 +5,14 @@
 > **The second-opinion ritual for Slack teams.**
 > 5 voices, 1 verdict, every voice scored against reality at resolution. 10 seconds and ~$0.03 a fire.
 
+<p align="center">
+  <a href="https://slack.com/oauth/v2/authorize?client_id=11359462715059.11363815205158&scope=app_mentions:read,canvases:read,canvases:write,channels:history,channels:read,chat:write,chat:write.public,commands,im:history,users:read&user_scope=">
+    <img alt="Add to Slack" height="40" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" />
+  </a>
+</p>
+
+> 🟢 **Installs to any Slack workspace via standard OAuth v2** — Free-plan compatible (slash command + Canvas + Brier audit work out of the box; Workflow Builder requires a Pro/Sandbox workspace). Per-workspace `bot_token` stored in Supabase via SECURITY DEFINER RPC; never returned to the client.
+
 <details>
 <summary><b>👋 For Slack Agent Builder Challenge judges — 3-minute tour</b></summary>
 

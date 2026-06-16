@@ -2,6 +2,17 @@
 
 Council for Slack — ship log. Days numbered from the Splunk + Band of Agents hackathon week kickoff (2026-06-13). Format follows Keep-a-Changelog ish; targeted at hackathon judges reviewing daily progression.
 
+## Day 11.5 — 2026-06-16 evening
+
+### Added
+
+- **OAuth install flow** — `Add to Slack` button in the README. Judges and external users install to their own workspace in one click. The Free-plan manifest version installs cleanly (slash + Canvas + Brier audit); the with-functions manifest still requires Pro/Sandbox.
+- Migration `004_oauth_installations.sql` with `council.installations` table (RLS deny-all) and two SECURITY DEFINER RPCs: `council_installation_upsert` for the redirect handler, `council_get_install_token` for the events handler.
+- `web/pages/api/slack/oauth_redirect.ts` — exchanges Slack code for bot_token, upserts via RPC, redirects to `/installed` success page.
+- `web/pages/installed.tsx` — success page with "Open Slack" deep link and the first `/council` command to try.
+- `lib/db.ts:getInstallToken()` with 60s in-process cache (avoids ~20ms Supabase round-trip on every Slack event).
+- Bolt `authorize` callback resolves inbound `team_id` to its installed `bot_token`, falling back to env `SLACK_BOT_TOKEN` for sandbox use.
+
 ## Day 11 — 2026-06-16
 
 ### Added

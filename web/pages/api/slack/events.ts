@@ -6,6 +6,7 @@ import {
   listRecentDecisions,
   resolveDecision,
   getWorkspaceStats,
+  getInstallToken,
   type RecentDecision,
   type WorkspaceStats,
 } from "../../../lib/db";
@@ -31,10 +32,23 @@ const receiver = new ExpressReceiver({
   endpoints: "/",
 });
 
+// Multi-workspace authorize: resolves the inbound team_id to its installed
+// bot_token from council.installations. Falls back to the env-var
+// SLACK_BOT_TOKEN for the sandbox workspace (so dev + judging continue to
+// work without forcing every developer through OAuth).
 const app = new App({
-  token: botToken,
   receiver,
   processBeforeResponse: true,
+  authorize: async ({ teamId }) => {
+    if (teamId) {
+      const stored = await getInstallToken(teamId);
+      if (stored) {
+        return { botToken: stored };
+      }
+    }
+    // Sandbox / dev fallback.
+    return { botToken };
+  },
 });
 
 const council = new CouncilDiff({ apiKey: anthropicKey });

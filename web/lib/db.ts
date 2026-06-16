@@ -181,3 +181,31 @@ export async function getWorkspaceStats(
     calibration_label: (row.calibration_label ?? "pending") as WorkspaceStats["calibration_label"],
   };
 }
+
+// Resolves a workspace_id to its installed bot_token. Returns null if the
+// workspace hasn't installed via OAuth (caller falls back to env-var
+// SLACK_BOT_TOKEN for sandbox use). Cached in-process for a short window
+// since this is called on every Slack event and would otherwise add ~20ms
+// of Supabase round-trip to each /council fire.
+const _tokenCache = new Map<string, { token: string; until: number }>();
+const TOKEN_CACHE_TTL_MS = 60_000;
+
+export async function getInstallToken(workspaceId: string): Promise<string | null> {
+  const cached = _tokenCache.get(workspaceId);
+  if (cached && cached.until > Date.now()) return cached.token;
+
+  const db = getDb();
+  if (!db) return null;
+  const { data, error } = await db.rpc("council_get_install_token", {
+    p_workspace_id: workspaceId,
+  });
+  if (error) {
+    console.error("[db] getInstallToken failed", error);
+    return null;
+  }
+  const token = (data as string | null) ?? null;
+  if (token) {
+    _tokenCache.set(workspaceId, { token, until: Date.now() + TOKEN_CACHE_TTL_MS });
+  }
+  return token;
+}
