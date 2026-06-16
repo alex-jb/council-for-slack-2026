@@ -444,6 +444,93 @@ app.event("app_mention", async ({ event, say }) => {
   });
 });
 
+// Day 10 — Workflow Builder custom function.
+// Lets non-coder Slack admins drop "Council deliberate" into any Workflow Builder
+// workflow. e.g. "when Jira issue moves to 'needs decision' → council_deliberate
+// with the issue body → post verdict to thread". Inputs/outputs declared in the
+// app manifest's top-level `functions:` block (see docs/slack-app-manifest.md).
+//
+// IMPORTANT: do NOT call ack() inside .function — Bolt acks implicitly. Call
+// complete({outputs}) on success or fail({error}) on failure. complete/fail
+// POST back to Slack via Web API, so they're independent of the HTTP response
+// and compatible with processBeforeResponse:true on Vercel serverless.
+app.function("council_deliberate", async ({ inputs, complete, fail, client, logger }) => {
+  const typed = inputs as {
+    question?: string;
+    channel_id?: string;
+    domain?: string;
+    context?: string;
+    requester_id?: string;
+  };
+
+  const question = (typed.question ?? "").trim();
+  const channelId = typed.channel_id ?? "";
+  const domainInput = (typed.domain ?? "founder").toLowerCase();
+  const domain: Domain = (VALID_DOMAINS as readonly string[]).includes(domainInput)
+    ? (domainInput as Domain)
+    : "founder";
+  const context = typed.context?.trim() || undefined;
+  const requesterId = typed.requester_id ?? "workflow";
+
+  if (!question) {
+    await fail({ error: "council_deliberate: `question` input is required" });
+    return;
+  }
+  if (!channelId) {
+    await fail({ error: "council_deliberate: `channel_id` input is required" });
+    return;
+  }
+
+  try {
+    const result = await council.deliberate({ domain, decision: question, context });
+
+    const persist = await persistDecision({
+      slack_workspace_id: (inputs as { team_id?: string }).team_id ?? "",
+      slack_user_id: requesterId,
+      slack_channel_id: channelId,
+      question,
+      context: context ?? null,
+      result,
+    });
+
+    // Post the verdict to the channel the workflow author wired. The function
+    // step pattern surfaces this as the workflow's downstream output too.
+    await client.chat.postMessage({
+      channel: channelId,
+      text: formatVerdicts(result, persist.id, persist.error, persist.debug, domain),
+    });
+
+    // Fire-and-forget canvas log — same pattern as /council slash command.
+    appendCanvasLog({
+      client,
+      channelId,
+      decision: question,
+      domain,
+      result,
+      decisionId: persist.id,
+      userId: requesterId,
+    }).catch((err) => logger.error("[function council_deliberate] canvas append rejected", err));
+
+    const agreementPct = Math.round(result.agreement_score * 100);
+    const summary = `${result.recommendation.toUpperCase()} (${agreementPct}% agreement, ${domain}): ${result.consensus}`;
+
+    await complete({
+      outputs: {
+        verdict: result.recommendation.toUpperCase(),
+        recommendation: result.recommendation,
+        agreement_score: result.agreement_score,
+        consensus: result.consensus,
+        summary,
+        decision_id: persist.id ?? "",
+      },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.error("[function council_deliberate] failed", err);
+    await fail({ error: `council_deliberate failed: ${message}` });
+  }
+});
+
 // Message-action shortcut: right-click any Slack message → "Send to council"
 // Opens a modal so the user picks the domain and (optionally) adds context.
 // Manifest needs: interactivity.is_enabled + shortcuts: callback_id "send_to_council" type "message".
