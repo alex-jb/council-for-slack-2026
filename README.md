@@ -1,15 +1,40 @@
 # Council for Slack
 
-> **The production layer Karpathy's LLM Council was always missing.**
-> 5 personas debate. 1 verdict. Every voice Brier-audited at resolution.
+> **The second-opinion ritual for Slack teams.**
+> 5 voices, 1 verdict, every voice scored against reality at resolution. 10 seconds and ~$0.03 a fire.
 
-Slack-native multi-persona AI council for high-stakes decisions. Built on [council-diff](https://github.com/alex-jb/council-diff) v0.4.0. Targeting [Slack Agent Builder Challenge](https://slackcommunity.com/challenges/agent-builder) 2026-07-13.
+Every team already has the *informal* ritual: before a real decision ships, somebody DMs three trusted people and asks "what would you do?". The replies disagree. The disagreement is the signal. Council makes that ritual native to the channel where the decision is happening, then keeps score.
 
-> 中文 README 路上 (`README.zh-CN.md` Day 6 ship).
+Built on [council-diff](https://github.com/alex-jb/council-diff) v0.4.0 (OSS, MIT, on npm). Targeting [Slack Agent Builder Challenge](https://slackcommunity.com/challenges/agent-builder) 2026-07-13.
+
+> 中文 README 路上 (`README.zh-CN.md` Week 2 ship).
 
 ---
 
-## What it does
+## The ritual
+
+```
+1. Decision shows up in a Slack channel.
+   "Should we ship the bigger discount on the enterprise deal?"
+
+2. Someone types  /council [question] | [context]
+   (or :investor / :engineer / :product / :quant / :career
+    to pick the right roster of voices)
+
+3. Ten seconds later, 5 domain-typed personas reply in channel.
+   They disagree. The disagreement is the signal.
+
+4. The decision goes into the channel's pinned Canvas — a permanent,
+   Brier-audited log every team member can scroll back through.
+
+5. Weeks later, when reality lands, anyone clicks ✅ / ❌ on the
+   pending decision. Every voice gets a calibration score. Over time,
+   the team learns which voices to trust on which kinds of questions.
+```
+
+That is the ritual. Five voices, one verdict, scored against reality. The same shape on Tuesday's hiring call and Friday's pricing call. The same shape on a $5K SaaS bill and a $5M term sheet.
+
+## What you actually see
 
 Type `/council [your question] | [optional context]` in any Slack channel. 5 founder-domain personas (YC Partner, Tier-1 VC Skeptic, Lawyer, Indie CFO, Pragmatic Spouse) deliberate in parallel via Anthropic Sonnet 4.6. About 10 seconds later, an in-channel verdict appears with:
 
@@ -159,7 +184,8 @@ Built solo over one day during the Splunk + Band of Agents hackathon week (2026-
 - [x] Day 6 — **MCP server scaffold** ([`mcp/`](./mcp/)) — same council-diff primitive exposed to Claude Desktop / Cursor / Claude Code (Slack Agent Builder rubric: platform integration ✓)
 - [x] Day 7 — Multi-domain syntax (`/council :investor [decision] | [context]`, also `:engineer` `:product` `:quant` `:career`; `founder` remains the default)
 - [x] Day 8 — **Channel Canvas as decision log** — every `/council` fire auto-appends a Brier-audited entry to the channel's pinned Canvas, so the second-opinion ritual builds a calibrated history visible at the top of every channel. Fire-and-forget; never blocks the user verdict.
-- [ ] Day 9 — Average Brier over time (per-workspace calibration meta-metric)
+- [x] Day 9 — **"Send to council" message shortcut** — right-click any Slack message → modal with domain picker + optional context → verdict posts as a thread reply on the source message and the Canvas log gets a new entry. The viral wedge for the second-opinion ritual: somebody's hot take in a thread becomes a calibrated decision in two clicks.
+- [ ] Day 10 — Average Brier over time (per-workspace calibration meta-metric)
 - [ ] Week 2 — OAuth install flow (multi-workspace)
 - [ ] Week 2 — AMD MI300X vLLM backend branch (council-diff `feat/amd-backend`)
 - [ ] Week 3 — 90-sec Loom demo for 7/13 submission

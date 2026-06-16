@@ -431,6 +431,168 @@ app.event("app_mention", async ({ event, say }) => {
   });
 });
 
+// Message-action shortcut: right-click any Slack message → "Send to council"
+// Opens a modal so the user picks the domain and (optionally) adds context.
+// Manifest needs: interactivity.is_enabled + shortcuts: callback_id "send_to_council" type "message".
+app.shortcut("send_to_council", async ({ shortcut, ack, client }) => {
+  await ack();
+
+  // Only message shortcuts carry .message — bail safely if a different shortcut shape sneaks in.
+  if (shortcut.type !== "message_action") return;
+
+  const messageText = shortcut.message?.text ?? "";
+  const channelId = shortcut.channel?.id ?? "";
+  const messageTs = shortcut.message_ts ?? shortcut.message?.ts ?? "";
+
+  const truncated =
+    messageText.length > 600 ? `${messageText.slice(0, 600)}…` : messageText;
+
+  const domainOptions = VALID_DOMAINS.map((d) => ({
+    text: { type: "plain_text" as const, text: d },
+    value: d,
+  }));
+
+  try {
+    await client.views.open({
+      trigger_id: shortcut.trigger_id,
+      view: {
+        type: "modal",
+        callback_id: "council_modal_submit",
+        private_metadata: JSON.stringify({ channelId, messageTs }),
+        title: { type: "plain_text", text: "Send to Council" },
+        submit: { type: "plain_text", text: "Convene" },
+        close: { type: "plain_text", text: "Cancel" },
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `*This message will be the decision:*\n>${truncated || "_(empty message)_"}`,
+            },
+          },
+          {
+            type: "input",
+            block_id: "domain_block",
+            label: { type: "plain_text", text: "Domain" },
+            element: {
+              type: "static_select",
+              action_id: "domain_select",
+              initial_option: domainOptions[0],
+              options: domainOptions,
+            },
+          },
+          {
+            type: "input",
+            block_id: "context_block",
+            optional: true,
+            label: { type: "plain_text", text: "Context (optional)" },
+            element: {
+              type: "plain_text_input",
+              action_id: "context_input",
+              multiline: true,
+              placeholder: {
+                type: "plain_text",
+                text: "Ground truth — numbers, dates, constraints…",
+              },
+            },
+          },
+          {
+            type: "context",
+            elements: [
+              {
+                type: "mrkdwn",
+                text: "_Council will post the verdict as a threaded reply on the source message and append a row to this channel's Canvas decision log. ~10s, ~$0.03._",
+              },
+            ],
+          },
+        ],
+      },
+    });
+  } catch (err) {
+    console.error("[shortcut send_to_council] views.open failed", err);
+  }
+});
+
+// Modal submission from the message shortcut → fire council, post verdict as thread reply.
+app.view("council_modal_submit", async ({ ack, view, client, body }) => {
+  await ack();
+
+  let metadata: { channelId: string; messageTs: string };
+  try {
+    metadata = JSON.parse(view.private_metadata);
+  } catch {
+    console.error("[shortcut] bad private_metadata", view.private_metadata);
+    return;
+  }
+  const { channelId, messageTs } = metadata;
+
+  const domainValue =
+    view.state.values?.domain_block?.domain_select?.selected_option?.value;
+  const domain: Domain =
+    domainValue && (VALID_DOMAINS as readonly string[]).includes(domainValue)
+      ? (domainValue as Domain)
+      : "founder";
+  const context =
+    view.state.values?.context_block?.context_input?.value || undefined;
+
+  // Pull the source message via conversations.history so the decision text matches what the user clicked.
+  let decision = "(message text unavailable)";
+  try {
+    const history = (await client.apiCall("conversations.history", {
+      channel: channelId,
+      latest: messageTs,
+      oldest: messageTs,
+      inclusive: true,
+      limit: 1,
+    })) as { messages?: Array<{ text?: string }> };
+    decision = history.messages?.[0]?.text ?? decision;
+  } catch (err) {
+    console.error("[shortcut] conversations.history failed", err);
+  }
+
+  const userId = body.user?.id ?? "unknown";
+
+  try {
+    const result = await council.deliberate({ domain, decision, context });
+    const persist = await persistDecision({
+      slack_workspace_id: body.team?.id ?? "",
+      slack_user_id: userId,
+      slack_channel_id: channelId,
+      question: decision,
+      context: context ?? null,
+      result,
+    });
+
+    await client.chat.postMessage({
+      channel: channelId,
+      thread_ts: messageTs,
+      text: formatVerdicts(result, persist.id, persist.error, persist.debug, domain),
+    });
+
+    appendCanvasLog({
+      client,
+      channelId,
+      decision,
+      domain,
+      result,
+      decisionId: persist.id,
+      userId,
+    }).catch((err) => console.error("[canvas] shortcut append rejected", err));
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[shortcut deliberation] failed", err);
+    // DM the user the error so the source channel doesn't get spammed.
+    try {
+      await client.chat.postMessage({
+        channel: userId,
+        text: `:x: Council error from your "Send to council" shortcut: \`${message}\``,
+      });
+    } catch (dmErr) {
+      console.error("[shortcut] failed to DM user about error", dmErr);
+    }
+  }
+});
+
 export const config = {
   api: {
     bodyParser: false,

@@ -65,6 +65,17 @@ settings:
   org_deploy_enabled: false
   socket_mode_enabled: false
   token_rotation_enabled: false
+
+# Day 9 — message-action shortcut "Send to council"
+# In the Slack app config UI: Interactivity & Shortcuts → "Create New Shortcut" → "On messages"
+#   Name: Send to council
+#   Short description: Get a 5-persona AI council to deliberate on this message
+#   Callback ID: send_to_council
+shortcuts:
+  - name: Send to council
+    type: message
+    callback_id: send_to_council
+    description: Get a 5-persona AI council to deliberate on this message
 ```
 
 ## After save
