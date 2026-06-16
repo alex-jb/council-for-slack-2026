@@ -106,9 +106,9 @@ Common shape: **the decision is real**, the question is **hard but well-formed**
 
 ---
 
-## Live case studies — three real fires, three different shapes
+## Live case studies — four real fires, full verdict spectrum
 
-Three `council.deliberate()` fires from 2026-06. Same engine. Three different verdict shapes. The shape of the question determined the shape of the verdict.
+Four `council.deliberate()` fires from 2026-06. Same engine. Four different verdict shapes spanning the full spectrum from GO to KILL. The shape of the question determined the shape of the verdict.
 
 ### 1. [GOOGL Q3 2026 — Druckenmiller vs Berkshire](./docs/case-studies/googl-q3-2026.md) (`investor` domain · fired 2026-06-15)
 
@@ -128,10 +128,17 @@ Universal SaaS founder decision: 40% of churn is involuntary card-decline, compe
 
 The infra-team-Slack-thread-that-runs-for-two-months question: P99 380ms, $9K/mo CPU, 16-of-18 engineers Python-native, two known features on the roadmap. Single-LLM would either cheerlead Rust or list 12 caveats.
 
-- **Recommendation**: `WAIT` · Agreement: `0.62` · Voice spread: 22 → 72 (**50 points — widest of the triad**)
+- **Recommendation**: `WAIT` · Agreement: `0.62` · Voice spread: 22 → 72 (**50 points — widest spread of the quartet**)
 - **Consensus**: *"directionally sound — Python has a structural ceiling — but timing is wrong. Profile Python first → grow Rust fluency across 4-6 engineers → execute rewrite from competence, not latency panic."*
 
-**The verdicts are not chosen for variety.** GOOGL is WAIT because the regulatory binary makes sizing wrong. Annual billing is GO because the math is clean. Rust is WAIT because the direction is right but the timing isn't — and the council surfaces a concrete next-step program, not a 12-bullet "consider these factors" cop-out. **Same engine. Three different shapes. The agreement score is the calibration signal.**
+### 4. [Crypto payments on a B2B SaaS](./docs/case-studies/crypto-payments-2026-06.md) (`founder` domain · fired 2026-06-16)
+
+The "loud board member, silent customers" problem. Zero inbound asks in 18 months, $45K + 8-10 eng-weeks for a feature with no revenue thesis, FinCEN gray area. Single-LLM with sycophantic default tone won't say KILL outright.
+
+- **Recommendation**: **`KILL`** · Agreement: `0.94` · Voice spread: 4 → 12 (**tightest of the quartet — only 8 points**)
+- **Consensus**: *"every voice opposes this for independent reasons — bad unit economics, regulatory tail risk, opportunity cost against SOC 2, and team morale. The board member's push reflects a personal background bias, not customer or market signal."*
+
+**The verdicts are not chosen for variety.** GOOGL is WAIT because the regulatory binary makes sizing wrong. Annual billing is GO because the math is clean. Rust is WAIT because the direction is right but the timing isn't. Crypto payments is KILL because every framing (eng / legal / finance / capital / morale) lands under 13. **Same engine. Four different shapes spanning the full verdict spectrum. The agreement score is the calibration signal.**
 
 ---
 

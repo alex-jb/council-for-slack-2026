@@ -9,8 +9,10 @@ Council for Slack — ship log. Days numbered from the Splunk + Band of Agents h
 - **Workspace calibration meta-metric** in `/council-audit` header. Single labelled number (`excellent` < 0.10 / `good` / `fair` / `needs-work`) over the workspace's avg Brier across all resolved decisions. Teams compete on a number that drifts in real-time as decisions land.
 - Migration `003_workspace_stats.sql` with `council_workspace_stats(workspace_id)` SECURITY DEFINER RPC.
 - `getWorkspaceStats()` in `web/lib/db.ts` with soft-null handling so audit still renders if the migration isn't applied yet.
-- Third case study: [Rust rewrite of Python inference router](./docs/case-studies/rust-rewrite-2026-06.md) — `engineer` domain, WAIT verdict, 50-point voice spread (widest of the triad).
+- Fourth case study: [Crypto payments on a B2B SaaS](./docs/case-studies/crypto-payments-2026-06.md) — `founder` domain, **KILL** verdict, 0.94 agreement (highest), 8-point voice spread (tightest). Completes the GO / WAIT / KILL verdict spectrum.
+- Third case study: [Rust rewrite of Python inference router](./docs/case-studies/rust-rewrite-2026-06.md) — `engineer` domain, WAIT verdict, 50-point voice spread (widest of the quartet).
 - Second case study: [Annual billing at "2 months free"](./docs/case-studies/annual-billing-2026-06.md) — `founder` domain, GO verdict, 0.89 agreement, 16-point voice spread.
+- `CONTRIBUTING.md` + `CODE_OF_CONDUCT.md` — OSS hygiene for judges and future contributors. "Disagreement is the signal" + "scored claims only" baked into the conduct rules — the project's own thesis applied to how we build it.
 - README "Three Slack-native surfaces, one engine" section calling out 3/3 rubric-required tech up front for judges.
 - README "Who uses this" section with 5 personas (solo founder, PM, eng lead, investment analyst, CTO).
 - `docs/devpost-submission.md` — copy-paste pack for the Devpost submission form.
