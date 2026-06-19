@@ -119,18 +119,20 @@ Then under "Built for hackathon": select Slack Agent Builder Challenge. Under "T
 
 If recording on 7/6 + 7/10 + 7/12 all produced unusable takes (Slack notifications, audio glitches, function timeouts during demo, etc.), submission still ships with these 4 fallbacks:
 
-### Fallback 1 — case-study Pdf "static demo"
+### Fallback 1 — case-study PDF "static demo"
 
-The 4 case studies in `docs/case-studies/` show the same engine + same Brier audit on real fires. Each Markdown has the full voice-by-voice output + agreement score + verdict. Compile to a single PDF:
+**Already built and committed at `docs/case-studies/four-fires-static-demo.pdf`** (25 pages, ~456 KB). 4 real fires: crypto-payments KILL / annual-billing GO / GOOGL WAIT / Rust-rewrite WAIT. Full voice-by-voice output, agreement scores, consensus quotes.
+
+To regenerate after any case-study edit:
 
 ```bash
 cd ~/Desktop/council-for-slack-2026
-pandoc docs/case-studies/{crypto-payments-2026-06,annual-billing-2026-06,googl-q3-2026,rust-rewrite-2026-06}.md \
-  -o docs/case-studies/four-fires-static-demo.pdf \
-  --pdf-engine=wkhtmltopdf
+bash scripts/build-static-demo-pdf.sh
 ```
 
-Embed link in Devpost description: "Live demo deferred — see [four-fires-static-demo.pdf] for 4 real fires across the full GO/WAIT/KILL spectrum."
+Pipeline is pandoc → HTML → Chrome headless `--print-to-pdf` (same chain as the Jason / Professor / YU Dean decks). Branded title page, cyan accent borders, midnight indigo headers. ~30 seconds end-to-end.
+
+Embed link in Devpost description: "Live demo deferred — see [`docs/case-studies/four-fires-static-demo.pdf`](https://github.com/alex-jb/council-for-slack-2026/blob/main/docs/case-studies/four-fires-static-demo.pdf) for 4 real fires across the full GO/WAIT/KILL spectrum."
 
 ### Fallback 2 — judge clone-and-run instructions
 

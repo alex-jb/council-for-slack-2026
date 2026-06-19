@@ -5,3 +5,6 @@ node_modules/
 .next/
 *.log
 .DS_Store
+
+# Build intermediates for static-demo PDF (output PDF is committed)
+docs/case-studies/.build/
