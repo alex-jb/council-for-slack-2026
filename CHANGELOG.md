@@ -2,6 +2,12 @@
 
 Council for Slack — ship log. Days numbered from the Splunk + Band of Agents hackathon week kickoff (2026-06-13). Format follows Keep-a-Changelog ish; targeted at hackathon judges reviewing daily progression.
 
+## Day 14.5 — 2026-06-19 / submission runbook consolidation
+
+### Added
+
+- **`docs/SUBMISSION-RUNBOOK-7-13.md`** — single-source 7/13 submission day runbook compiled from 8 individual docs (loom-script, loom-rehearsal, loom-pre-stage-workspace, devpost-submission, submission-1pager, alex-next-todo, 3week-upgrade-roadmap, distribution-2026-06-16-googl). T-minus calendar from 7/6 → 7/14, pre-flight verifications (3 curl + psql checks), recording 2h block timing, Devpost form-fill field-by-field map, 4 backup demo fallbacks if Loom fails, 4 final-day verification gates, deferred-not-blocker list. Eliminates the "which doc do I open first" friction on submission day.
+
 ## Day 11.75 — 2026-06-16 late night / distribution + telemetry
 
 ### Added
