@@ -2,6 +2,21 @@
 
 Council for Slack — ship log. Days numbered from the Splunk + Band of Agents hackathon week kickoff (2026-06-13). Format follows Keep-a-Changelog ish; targeted at hackathon judges reviewing daily progression.
 
+## Day 17 — 2026-06-22 / ARD v0.9 conformance MV shipped
+
+### Added
+
+- **`web/public/.well-known/ai-catalog.json`** — capability manifest per ARD spec §4.1 (ards-project/ard-spec v0.9 Draft, 2026-05-28). `specVersion: "1.0"` + host block with `did:web:council-for-slack-2026.vercel.app` identifier + single entry for the MCP server with URN `urn:air:council-for-slack-2026.vercel.app:server:council`. Hosted at the Vercel deployment root so registries crawling `/.well-known/ai-catalog.json` find it automatically. 5 representative queries spanning the 6 supported personas (founder / engineer / investor / career / product / quant) to maximize search-time relevance scoring.
+- **`web/public/.well-known/mcp-cards/council.json`** — MCP server card the catalog entry's `url` resolves to. Captures the full `council_deliberate` tool spec verbatim from `mcp/src/server.mjs`: name + description + input schema (domain enum + decision + context + oracle + safeMode) + output schema (recommendation + agreement_score + consensus + voices[]). Annotations block declares `expectedLatencyMs: 10000`, `costUsdEstimate: 0.03`, `deterministic: false`, `sideEffects: "none"` so callers can budget. Top-level `ard.conformsTo` field cites the audited spec version + links the audit doc.
+
+### Why this matters
+
+Closes [#1](https://github.com/alex-jb/council-for-slack-2026/issues/1) — the MV audit plan documented in `docs/ard-audit.md` is now realized. Future Agent Registries (per ARD §6) can index this deployment automatically — no signup, no manual submission. Slack Agent Builder Challenge submission (7/13) can now declare ARD v0.9 conformance honestly. Two deferred items per the audit (trustManifest with SPIFFE attestations + dynamic search endpoint) are out of MV scope; revisit for v1.0.
+
+### Validation
+
+JSON files validated against ARD §3.4 (strict value-or-reference: entry has `url`, no `data`), §4.1 (host identifier present + entries array non-empty), §4.2 (identifier follows `urn:air:<domain>:<type>:<name>` pattern), and cross-consistency (catalog `capabilities[0]` matches card `tools[0].name`).
+
 ## Day 14.5 — 2026-06-19 / submission runbook consolidation
 
 ### Added
