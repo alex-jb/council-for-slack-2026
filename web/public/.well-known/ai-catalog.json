@@ -1,0 +1,32 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Council for Slack",
+    "identifier": "did:web:council-for-slack-2026.vercel.app"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:council-for-slack-2026.vercel.app:server:council",
+      "displayName": "Council Deliberate (MCP)",
+      "type": "application/mcp-server-card+json",
+      "url": "https://council-for-slack-2026.vercel.app/.well-known/mcp-cards/council.json",
+      "capabilities": ["council_deliberate"],
+      "description": "Fire a 5-persona AI council on a high-stakes decision. Returns GO / WAIT / KILL / SPLIT recommendation with agreement score and per-voice verdicts. Built on council-diff v0.6 (Anthropic Sonnet 4.6 default; OpenAI / GLM via llm-adapter from council-diff#1).",
+      "representativeQueries": [
+        "Should I raise a $1M seed or bootstrap?",
+        "Should I rewrite this service in Rust?",
+        "Is this a buy at 22x forward earnings?",
+        "Should we approve this loan with FICO 720, DTI 0.42, LTV 0.77?",
+        "Should I take the senior PM offer at a Series B or stay at FAANG?"
+      ],
+      "tags": [
+        "council",
+        "deliberation",
+        "decision-support",
+        "multi-voice",
+        "brier-audited"
+      ],
+      "publisher": "alex-jb"
+    }
+  ]
+}

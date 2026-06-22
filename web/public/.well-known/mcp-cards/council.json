@@ -1,0 +1,101 @@
+{
+  "name": "council-for-slack",
+  "version": "0.6.0",
+  "description": "MCP server wrapping council-diff (npm: council-diff) as a single tool. Fires a 5-persona AI council on a decision and returns structured verdicts with agreement score, per-voice rationale, and a synthesized consensus. Built on council-diff v0.6 — supports Anthropic Sonnet 4.6 by default with optional OpenAI / GLM fallback via the llm-adapter abstraction (council-diff#1).",
+  "publisher": {
+    "name": "alex-jb",
+    "identifier": "did:web:council-for-slack-2026.vercel.app"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/alex-jb/council-for-slack-2026",
+  "repository": "https://github.com/alex-jb/council-for-slack-2026",
+  "transport": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "council-for-slack-mcp"]
+  },
+  "tools": [
+    {
+      "name": "council_deliberate",
+      "description": "Fire a 5-persona AI council on a high-stakes decision. Returns a GO / WAIT / KILL / SPLIT recommendation, agreement score, and per-voice verdicts with strongest signal and biggest gap. Built on council-diff v0.6 (Anthropic Sonnet 4.6, ~10s, ~$0.03). Use when the question has real downside, ambiguity, or smart-money disagreement — not for trivial choices.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "domain": {
+            "type": "string",
+            "enum": [
+              "founder",
+              "engineer",
+              "investor",
+              "career",
+              "product",
+              "quant"
+            ],
+            "description": "Persona roster. founder = YC Partner / VC Skeptic / Lawyer / Indie CFO / Pragmatic Spouse. engineer = Rust Maintainer / SRE Oncall / Recruiter / Junior Dev / CTO 5y Later. investor = Macro / Sector / PM / Growth VC / Activist Short. career = Mentor 20y / Recruiter / Peer / CSO / Future You. product = Real User / Competitor / Internal Dev / Garry-style / Naval-style. quant = Jane Street MD / Citadel / Two Sigma ML / Anthropic / HFT Engineer."
+          },
+          "decision": {
+            "type": "string",
+            "description": "The question. Phrase as a binary or short-list, not open-ended."
+          },
+          "context": {
+            "type": "string",
+            "description": "Ground truth the personas need to score honestly. Numbers, dates, constraints. Without context the personas correctly punish the question with low scores."
+          },
+          "oracle": {
+            "type": "string",
+            "enum": ["fable-5"],
+            "description": "DO NOT SET BY DEFAULT. Fable 5 access is currently restricted by Anthropic. Only set when the user has explicitly asked for an Oracle / Fable 5 / tiebreak and you have evidence the entitlement is active."
+          },
+          "safeMode": {
+            "type": "boolean",
+            "description": "Force zero-retention path. When true, oracle silently downgrades to Sonnet 4.6 fallback. Use for privacy-sensitive decisions (legal, M&A, personnel)."
+          }
+        },
+        "required": ["domain", "decision"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "recommendation": {
+            "type": "string",
+            "enum": ["go", "wait", "kill", "split"]
+          },
+          "agreement_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "1.0 = unanimous, 0.0 = maximally split."
+          },
+          "consensus": {
+            "type": "string",
+            "description": "1-paragraph synthesis (60-100 words)."
+          },
+          "voices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "voice": { "type": "string" },
+                "voice_display": { "type": "string" },
+                "score": { "type": "number", "minimum": 0, "maximum": 100 },
+                "verdict": { "type": "string" },
+                "strength": { "type": "string" },
+                "gap": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "annotations": {
+        "expectedLatencyMs": 10000,
+        "costUsdEstimate": 0.03,
+        "deterministic": false,
+        "sideEffects": "none"
+      }
+    }
+  ],
+  "ard": {
+    "conformsTo": "ards-project/ard-spec v0.9 (Draft)",
+    "auditDoc": "https://github.com/alex-jb/council-for-slack-2026/blob/main/docs/ard-audit.md"
+  }
+}
