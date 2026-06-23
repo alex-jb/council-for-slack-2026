@@ -4,7 +4,7 @@
   "description": "MCP server wrapping council-diff (npm: council-diff) as a single tool. Fires a 5-persona AI council on a decision and returns structured verdicts with agreement score, per-voice rationale, and a synthesized consensus. Built on council-diff v0.6 — supports Anthropic Sonnet 4.6 by default with optional OpenAI / GLM fallback via the llm-adapter abstraction (council-diff#1).",
   "publisher": {
     "name": "alex-jb",
-    "identifier": "did:web:council-for-slack-2026.vercel.app"
+    "identifier": "did:web:council-for-slack.vercel.app"
   },
   "license": "MIT",
   "homepage": "https://github.com/alex-jb/council-for-slack-2026",

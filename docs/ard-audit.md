@@ -14,7 +14,7 @@ This repo has three callable surfaces. ARD v0.9 cares about exactly one of them 
 **To declare ARD v0.9 conformance for Slack Agent Builder submission**, the MV scope is:
 1. Publish an `application/mcp-server-card+json` artifact (one file) describing the `council_deliberate` tool
 2. Reference that artifact from an `ai-catalog.json` hosted at `/.well-known/ai-catalog.json` on the Vercel deployment
-3. Use the URN identifier format `urn:air:council-for-slack-2026.vercel.app:server:council`
+3. Use the URN identifier format `urn:air:council-for-slack.vercel.app:server:council`
 
 Est effort: ~2-3h to land cleanly. Single PR, no architectural change.
 
@@ -40,8 +40,8 @@ The only surface in ARD scope. Per spec §4.1 (Capability Manifest) + §4.2 (Cat
 |---|---|---|---|
 | `/.well-known/ai-catalog.json` manifest hosted at the deployment host | ❌ Not present | **S** | One static JSON file. Vercel serves `public/.well-known/` files at the URL path by default in Next.js. |
 | Capability manifest `specVersion: "1.0"` field | ❌ Not present | **S** | Single string field in manifest. |
-| Manifest `host` block with `displayName` + `identifier` (DID format) | ❌ Not present | **S** | `did:web:council-for-slack-2026.vercel.app` is the canonical DID for a Vercel domain. |
-| Entry `identifier` in domain-anchored URN format `urn:air:domain:type:name` (§4.2.1) | ❌ Not present | **S** | `urn:air:council-for-slack-2026.vercel.app:server:council` |
+| Manifest `host` block with `displayName` + `identifier` (DID format) | ❌ Not present | **S** | `did:web:council-for-slack.vercel.app` is the canonical DID for a Vercel domain. |
+| Entry `identifier` in domain-anchored URN format `urn:air:domain:type:name` (§4.2.1) | ❌ Not present | **S** | `urn:air:council-for-slack.vercel.app:server:council` |
 | Entry `type` set to `application/mcp-server-card+json` | ❌ Not present | **S** | Single field. |
 | Entry exactly-one-of `url` or `data` (§3.4 Strict Value-or-Reference) | ❌ Not present | **S** | Choose `url` pointing to a hosted MCP card. |
 | MCP server card itself (the artifact `url` resolves to) | ❌ Not present — `mcp/src/server.mjs` defines the tool inline but never exports a card JSON | **M** | Generate from the existing `DELIBERATE_TOOL` definition in `mcp/src/server.mjs:22`. ~50 lines of static JSON: name, description, schema, capabilities list. |
@@ -74,14 +74,14 @@ The only surface in ARD scope. Per spec §4.1 (Capability Manifest) + §4.2 (Cat
   "specVersion": "1.0",
   "host": {
     "displayName": "Council for Slack",
-    "identifier": "did:web:council-for-slack-2026.vercel.app"
+    "identifier": "did:web:council-for-slack.vercel.app"
   },
   "entries": [
     {
-      "identifier": "urn:air:council-for-slack-2026.vercel.app:server:council",
+      "identifier": "urn:air:council-for-slack.vercel.app:server:council",
       "displayName": "Council Deliberate (MCP)",
       "type": "application/mcp-server-card+json",
-      "url": "https://council-for-slack-2026.vercel.app/.well-known/mcp-cards/council.json",
+      "url": "https://council-for-slack.vercel.app/.well-known/mcp-cards/council.json",
       "capabilities": ["council_deliberate"],
       "description": "Fire a 5-persona AI council on a high-stakes decision. Returns GO / WAIT / KILL / SPLIT recommendation with agreement score + per-voice verdicts. Wraps council-diff v0.6.",
       "representativeQueries": [

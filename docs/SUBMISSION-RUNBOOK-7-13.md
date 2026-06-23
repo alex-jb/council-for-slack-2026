@@ -27,7 +27,7 @@ These can be done any time in the 7-day window before 7/6 to remove day-of risk.
 ```bash
 # All three should return data:
 # (1) live deployment
-curl -s https://council-for-slack-2026.vercel.app/api/health | head -c 300
+curl -s https://council-for-slack.vercel.app/api/health | head -c 300
 
 # (2) Slack manifest installed in AJ Bot workspace
 # Check at https://api.slack.com/apps/A0BAVEM5SS0/general → look for "Installed" green dot
@@ -168,7 +168,7 @@ Open the Loom URL in an incognito window. Confirms public unlisted, not "login r
 ### Check 3 — live install link works
 
 ```bash
-# Visit https://council-for-slack-2026.vercel.app/install in incognito
+# Visit https://council-for-slack.vercel.app/install in incognito
 # Should redirect to slack.com/oauth/v2/authorize, NOT 404 or 500
 ```
 

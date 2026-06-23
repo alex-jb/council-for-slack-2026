@@ -2,14 +2,14 @@
   "specVersion": "1.0",
   "host": {
     "displayName": "Council for Slack",
-    "identifier": "did:web:council-for-slack-2026.vercel.app"
+    "identifier": "did:web:council-for-slack.vercel.app"
   },
   "entries": [
     {
-      "identifier": "urn:air:council-for-slack-2026.vercel.app:server:council",
+      "identifier": "urn:air:council-for-slack.vercel.app:server:council",
       "displayName": "Council Deliberate (MCP)",
       "type": "application/mcp-server-card+json",
-      "url": "https://council-for-slack-2026.vercel.app/.well-known/mcp-cards/council.json",
+      "url": "https://council-for-slack.vercel.app/.well-known/mcp-cards/council.json",
       "capabilities": ["council_deliberate"],
       "description": "Fire a 5-persona AI council on a high-stakes decision. Returns GO / WAIT / KILL / SPLIT recommendation with agreement score and per-voice verdicts. Built on council-diff v0.6 (Anthropic Sonnet 4.6 default; OpenAI / GLM via llm-adapter from council-diff#1).",
       "representativeQueries": [
