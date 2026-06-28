@@ -25,9 +25,18 @@ These can be done any time in the 7-day window before 7/6 to remove day-of risk.
 ### 1. Workspace state verified
 
 ```bash
-# All three should return data:
+# All five should return 200:
 # (1) live deployment
-curl -s https://council-for-slack.vercel.app/api/health | head -c 300
+curl -s -o /dev/null -w "%{http_code}\n" https://council-for-slack.vercel.app/api/health
+# (1a) ARD ai-catalog (added 2026-06-28 — judges will check this)
+curl -s -o /dev/null -w "%{http_code}\n" https://council-for-slack.vercel.app/.well-known/ai-catalog.json
+# (1b) ARD mcp-cards (added 2026-06-28 — judges will check this)
+curl -s -o /dev/null -w "%{http_code}\n" https://council-for-slack.vercel.app/.well-known/mcp-cards/council.json
+
+# IF any of (1a)/(1b) return 404, the canonical alias is stuck on an old
+# deploy (Vercel UNKNOWN-status flag bug). Fallback for Devpost: substitute
+# the latest unique deploy URL from `vercel ls` — it serves the same code.
+# Example fallback URL pattern: council-for-slack-<SHA>-alex-jbs-projects.vercel.app
 
 # (2) Slack manifest installed in AJ Bot workspace
 # Check at https://api.slack.com/apps/A0BAVEM5SS0/general → look for "Installed" green dot
@@ -36,6 +45,16 @@ curl -s https://council-for-slack.vercel.app/api/health | head -c 300
 echo $ANTHROPIC_API_KEY | head -c 12
 # expected prefix is the rotated key — NOT sk-ant-api03-_KdaUL... (that one was leaked)
 ```
+
+### 1b. Vercel UNKNOWN-status workaround (added 2026-06-28)
+
+Known issue since 2026-06-23: production deployments stick on `Status: UNKNOWN` in `vercel ls` and `vercel alias set` returns `Error: The deployment is not ready` even after the deployment is serving traffic correctly. Direct unique URL (`council-for-slack-<sha>-alex-jbs-projects.vercel.app`) works; the canonical alias does NOT auto-promote.
+
+If the canonical alias is still stuck on submission day:
+
+1. **Confirm new deploy is healthy** — `curl -o /dev/null -w "%{http_code}" https://council-for-slack-<latest-sha>-alex-jbs-projects.vercel.app/api/health` returns 200.
+2. **Substitute the unique URL in the Devpost form** for every public link (live demo, ARD endpoints, MCP card). Do NOT block submission on alias promotion.
+3. **Retry alias promotion in background** — `while ! vercel alias set <sha-url> council-for-slack.vercel.app; do sleep 120; done` — when it eventually clears, swap back.
 
 ### 2. Supabase RPCs respond
 
