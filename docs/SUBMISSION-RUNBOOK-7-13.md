@@ -46,15 +46,35 @@ echo $ANTHROPIC_API_KEY | head -c 12
 # expected prefix is the rotated key — NOT sk-ant-api03-_KdaUL... (that one was leaked)
 ```
 
-### 1b. Vercel UNKNOWN-status workaround (added 2026-06-28)
+### 1b. Vercel Deployment Protection + UNKNOWN-status fix (added 2026-06-28)
 
-Known issue since 2026-06-23: production deployments stick on `Status: UNKNOWN` in `vercel ls` and `vercel alias set` returns `Error: The deployment is not ready` even after the deployment is serving traffic correctly. Direct unique URL (`council-for-slack-<sha>-alex-jbs-projects.vercel.app`) works; the canonical alias does NOT auto-promote.
+Two stacked issues caught during the 2026-06-28 readiness audit:
 
-If the canonical alias is still stuck on submission day:
+**Issue A — Canonical alias is stuck on a pre-ARD deploy.** `council-for-slack.vercel.app/.well-known/ai-catalog.json` returns **404** because the canonical alias points at a 5-day-old deploy that predates commit `1a97749`. `vercel alias set` rejects with `Error: The deployment is not ready` even after fresh `vercel --prod --force` redeploys (Vercel internal status flag stuck on `UNKNOWN`).
 
-1. **Confirm new deploy is healthy** — `curl -o /dev/null -w "%{http_code}" https://council-for-slack-<latest-sha>-alex-jbs-projects.vercel.app/api/health` returns 200.
-2. **Substitute the unique URL in the Devpost form** for every public link (live demo, ARD endpoints, MCP card). Do NOT block submission on alias promotion.
-3. **Retry alias promotion in background** — `while ! vercel alias set <sha-url> council-for-slack.vercel.app; do sleep 120; done` — when it eventually clears, swap back.
+**Issue B — New deploys are behind Vercel Deployment Protection.** Hitting the new unique URL (`council-for-slack-<sha>-alex-jbs-projects.vercel.app/.well-known/ai-catalog.json`) returns a 200 *HTML SSO login wall*, not JSON. A judge clicking that URL gets Vercel Auth, not the ARD spec.
+
+**Real fix (Alex manual, ~2 min in Vercel dashboard):**
+
+1. Vercel project settings → **Deployment Protection** → toggle **Disabled** → Save.
+2. After Deployment Protection is OFF, every deploy URL (canonical + per-deploy unique) becomes publicly accessible.
+3. Verify: `curl -s https://council-for-slack-<latest-sha>-alex-jbs-projects.vercel.app/.well-known/ai-catalog.json | python3 -m json.tool | head -5` — should print valid JSON, not HTML.
+4. Then either (a) retry `vercel alias set <sha-url> council-for-slack.vercel.app` — sometimes the status flag clears after DP is off — or (b) just substitute the unique URL in the Devpost form. With DP off, the unique URL is publicly judge-accessible.
+
+**Do NOT** promote the alias before Deployment Protection is off — doing so would put the canonical URL behind the SSO wall, breaking the `/api/health` that currently works.
+
+**Safer promote script** (after DP is off):
+
+```bash
+# Only promotes if the candidate actually serves JSON, not an HTML auth wall
+DEPLOY=council-for-slack-<sha>-alex-jbs-projects.vercel.app
+CT=$(curl -s -o /dev/null -w '%{content_type}' "https://$DEPLOY/.well-known/ai-catalog.json")
+if [[ "$CT" == application/json* ]]; then
+  vercel alias set "$DEPLOY" council-for-slack.vercel.app
+else
+  echo "REFUSING — candidate returns $CT (likely auth wall). Disable Deployment Protection first."
+fi
+```
 
 ### 2. Supabase RPCs respond
 
