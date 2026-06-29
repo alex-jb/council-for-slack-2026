@@ -25,7 +25,11 @@ These can be done any time in the 7-day window before 7/6 to remove day-of risk.
 ### 1. Workspace state verified
 
 ```bash
-# All five should return 200:
+# One-curl pre-flight (added 2026-06-28 evening — judge-grade verification):
+curl -s https://council-for-slack.vercel.app/api/ard-self-check | python3 -m json.tool
+# Returns ard_compliant: true if all three checks pass, else a per-check breakdown.
+
+# Manual breakdown (if /api/ard-self-check itself is unreachable):
 # (1) live deployment
 curl -s -o /dev/null -w "%{http_code}\n" https://council-for-slack.vercel.app/api/health
 # (1a) ARD ai-catalog (added 2026-06-28 — judges will check this)
