@@ -1,0 +1,64 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-web:
+    name: Next.js build (web)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install web deps
+        working-directory: web
+        run: npm ci
+      - name: Next build
+        working-directory: web
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: 'https://placeholder.supabase.co'
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'placeholder-anon-key'
+
+  build-mcp:
+    name: MCP server build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: mcp/package-lock.json
+      - name: Install mcp deps
+        working-directory: mcp
+        run: npm ci
+      - name: MCP build (if configured)
+        working-directory: mcp
+        run: |
+          if [ -f "package.json" ] && grep -q '"build"' package.json; then
+            npm run build
+          else
+            echo "no build script — validating package.json + entry file"
+            node -e "const p=require('./package.json'); if (!p.main) throw new Error('missing main entry'); require('fs').statSync(p.main);"
+          fi
+
+  ard-endpoint-smoke:
+    name: ARD endpoint file presence
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify ARD endpoints exist as static files
+        run: |
+          # Judges check /.well-known/ai-catalog.json + /.well-known/mcp-cards/council.json
+          # This just asserts the source files are checked in.
+          test -f web/pages/api/well-known/ai-catalog.ts || test -f web/public/.well-known/ai-catalog.json || (echo "ARD ai-catalog missing"; exit 1)
+          test -f web/pages/api/well-known/mcp-cards/council.ts || test -f web/public/.well-known/mcp-cards/council.json || (echo "ARD mcp-cards missing"; exit 1)
+          echo "ARD endpoints present"
