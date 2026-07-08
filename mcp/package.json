@@ -7,6 +7,7 @@
   "license": "MIT",
   "author": "Alex Ji",
   "homepage": "https://github.com/alex-jb/council-for-slack-2026/tree/main/mcp",
+  "main": "./src/server.mjs",
   "bin": {
     "council-mcp": "./bin/cli.mjs"
   },
