@@ -1,0 +1,105 @@
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#0B1D2A','primaryTextColor':'#E6F7FF','primaryBorderColor':'#00E5FF','lineColor':'#00E5FF','secondaryColor':'#123247','tertiaryColor':'#1A3A52','fontFamily':'ui-sans-serif, system-ui, -apple-system, sans-serif'}}}%%
+flowchart TD
+    U["<b>Slack user</b><br/>types /council-audit or drops<br/>Council deliberate step into a workflow"]:::user
+
+    subgraph SLACK["Slack workspace"]
+        direction TB
+        SC["<b>Slash command</b><br/>/council-audit"]:::slack
+        WB["<b>Workflow Builder</b><br/>custom function<br/>council_deliberate"]:::rubric
+        MS["<b>Message shortcut</b><br/>Send to council"]:::slack
+    end
+
+    U --> SC
+    U --> WB
+    U --> MS
+
+    SC --> API
+    WB --> API
+    MS --> API
+
+    API["<b>events.ts</b> Bolt handler<br/>on Vercel serverless<br/>processBeforeResponse: true"]:::server
+
+    API --> CTX["<b>Context assembly</b><br/>channel history + thread + attachments"]:::server
+
+    CTX --> DISP["<b>council-diff engine dispatch</b><br/>5 parallel Anthropic Sonnet 4.6 calls"]:::server
+
+    DISP --> V1["Voice 1<br/>YC Partner"]:::voice
+    DISP --> V2["Voice 2<br/>Tier-1 VC Skeptic"]:::voice
+    DISP --> V3["Voice 3<br/>Lawyer"]:::voice
+    DISP --> V4["Voice 4<br/>Indie CFO"]:::voice
+    DISP --> V5["Voice 5<br/>Pragmatic Spouse"]:::voice
+
+    V1 --> AGG["<b>Aggregator</b><br/>agreement score + verdict + consensus"]:::server
+    V2 --> AGG
+    V3 --> AGG
+    V4 --> AGG
+    V5 --> AGG
+
+    AGG --> DB[("<b>Supabase</b><br/>council_decisions<br/>SECURITY DEFINER RPC")]:::store
+    AGG --> POST["<b>Slack reply</b><br/>Block Kit verdict in thread<br/>+ ✅/❌ resolve buttons"]:::server
+    AGG --> CANVAS["<b>Channel Canvas</b><br/>appendCanvasLog<br/>auto-pinned decision log"]:::rubric
+
+    POST --> THREAD["<b>Thread reply</b><br/>verdict + agreement + 5-voice scorecard<br/>+ Ed25519 attestation payload"]:::slack
+    CANVAS --> THREAD
+
+    MCP["<b>MCP server</b><br/>mcp/src/server.mjs<br/>tool card at /.well-known/mcp-cards/council.json"]:::rubric
+    MCP -.same engine.-> DISP
+    CLAUDE["Claude Desktop<br/>Cursor · Claude Code"]:::external
+    CLAUDE --> MCP
+
+    RESOLVE["<b>User resolves</b><br/>✅ Happened / ❌ Did not"]:::user
+    THREAD --> RESOLVE
+    RESOLVE --> BRIER["<b>Brier score</b><br/>per voice · per workspace<br/>calibration meta-metric"]:::server
+    BRIER --> DB
+    BRIER --> CANVAS
+
+    classDef user fill:#0B1D2A,stroke:#00E5FF,color:#E6F7FF,stroke-width:2px
+    classDef slack fill:#123247,stroke:#4A9DB8,color:#E6F7FF,stroke-width:1px
+    classDef rubric fill:#1A3A52,stroke:#00E5FF,color:#00E5FF,stroke-width:3px
+    classDef server fill:#0F2838,stroke:#4A9DB8,color:#E6F7FF,stroke-width:1px
+    classDef voice fill:#183043,stroke:#7FBFD4,color:#E6F7FF,stroke-width:1px
+    classDef store fill:#1F3A2A,stroke:#5FD46F,color:#E6F7FF,stroke-width:1px
+    classDef external fill:#2A1F3A,stroke:#B47FD4,color:#E6F7FF,stroke-width:1px
+
+    linkStyle default stroke:#4A9DB8,stroke-width:1.5px
+
+%% ═══════════════════════════════════════════════════════════════════════════
+%% Rubric-required Slack technologies highlighted in cyan borders:
+%%   1. Workflow Builder custom function (council_deliberate)
+%%   2. MCP server (tool card at /.well-known/mcp-cards/council.json)
+%%   3. Channel Canvas API (appendCanvasLog)
+%% ═══════════════════════════════════════════════════════════════════════════
+%%
+%% Real-Time Search (RTS) is NOT in the diagram because search:read is beta-queued
+%% and not live as of 2026-07-08. The rubric only requires "at least one" — we ship three.
+%%
+%% ─── RENDER TO SVG ───────────────────────────────────────────────────────────
+%%
+%% Prereqs: Node 18+ available (system Node or via nvm). The renderer downloads
+%% a headless Chromium the first time it runs, ~120 MB, one-time.
+%%
+%% From this directory:
+%%
+%%   npx -y @mermaid-js/mermaid-cli \
+%%     -i architecture-diagram.mmd \
+%%     -o architecture-diagram.svg \
+%%     -b transparent \
+%%     -w 1600
+%%
+%% For a PNG (for Devpost cover image slot):
+%%
+%%   npx -y @mermaid-js/mermaid-cli \
+%%     -i architecture-diagram.mmd \
+%%     -o architecture-diagram.png \
+%%     -b "#0B1D2A" \
+%%     -w 1920 -H 1080
+%%
+%% Verify the SVG opens cleanly in a browser before Devpost upload. Devpost's
+%% Markdown renderer supports SVG in images gallery via direct upload. Commit
+%% the generated .svg alongside this .mmd so judges can inspect either source.
+%%
+%% If the renderer complains about puppeteer download, prepend:
+%%   PUPPETEER_SKIP_DOWNLOAD=false PUPPETEER_DOWNLOAD_HOST=https://npmmirror.com/mirrors
+%% to work around US network flakiness.
+%%
+%% ─── review by Alex before submit ───────────────────────────────────────────
