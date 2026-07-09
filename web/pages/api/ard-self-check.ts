@@ -108,8 +108,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const healthRes = await check(`${origin}/api/health`);
   checks.push({ key: "health", url: "/api/health", ...healthRes });
 
-  // ARD v0.9 requires top-level "service" and "endpoints" keys.
-  const catalogRes = await check(`${origin}/.well-known/ai-catalog.json`, "service");
+  // ARD v1.0 requires top-level "host" and "entries" keys.
+  const catalogRes = await check(`${origin}/.well-known/ai-catalog.json`, "host");
   checks.push({ key: "ai-catalog", url: "/.well-known/ai-catalog.json", ...catalogRes });
 
   // MCP server card requires "name" and "tools" keys.
@@ -123,7 +123,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   return res.status(allOk ? 200 : 503).json({
     ard_compliant: allOk,
-    spec_version: "v0.9",
+    spec_version: "v1.0",
     checks,
     checks_passed: `${passed}/${total}`,
     duration_ms: duration,
